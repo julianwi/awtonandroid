@@ -6,6 +6,7 @@
   <property name="src" location="src"/>
   <property name="build" location="bin"/>
   <property name="dist"  location="dist"/>
+  <property name="glibj" location="lib/glibj.zip"/>
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -17,7 +18,7 @@
   <target name="compile" depends="init"
         description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}"/>
+    <javac srcdir="${src}" destdir="${build}" bootclasspath="lib/glibj.zip"/>
   </target>
 
   <target name="dist" depends="compile"
@@ -44,7 +45,7 @@
     </exec>
     <exec executable="adb">
         <arg value="shell"/>
-        <arg value="java -cp /sdcard/awtpeer.zip:/sdcard/test.jar test.main.Main"/>
+        <arg value="java -Dawt.toolkit=julianwi.awtpeer.AndroidToolkit -cp /sdcard/awtpeer.zip:/sdcard/test.jar test.main.Main"/>
     </exec>
 </target>
 </project>
