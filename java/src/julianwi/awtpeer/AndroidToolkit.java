@@ -72,6 +72,8 @@ import gnu.java.awt.peer.ClasspathFontPeer;
 import gnu.java.awt.peer.EmbeddedWindowPeer;
 
 public class AndroidToolkit extends ClasspathToolkit {
+	
+	private EventQueue eventQueue;
 
 	@Override
 	public EmbeddedWindowPeer createEmbeddedWindow(EmbeddedWindow arg0) {
@@ -115,8 +117,7 @@ public class AndroidToolkit extends ClasspathToolkit {
 
 	@Override
 	protected ButtonPeer createButton(Button arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+		return new AndroidButtonPeer(arg0);
 	}
 
 	@Override
@@ -325,8 +326,9 @@ public class AndroidToolkit extends ClasspathToolkit {
 
 	@Override
 	protected EventQueue getSystemEventQueueImpl() {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+		if (eventQueue == null)
+			eventQueue = new EventQueue();
+		return eventQueue;
 	}
 
 	@Override
