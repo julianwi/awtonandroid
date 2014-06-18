@@ -9,7 +9,7 @@
 
     <application
         android:icon="@drawable/duke"
-        android:label="java">
+        android:label="awtonandroid">
         <activity android:label="java" android:name=".WindowActivity" android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

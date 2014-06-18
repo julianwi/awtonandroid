@@ -34,6 +34,7 @@ public class AndroidButtonPeer extends AndroidComponentPeer implements ButtonPee
 	
 	@Override
 	public void handleEvent(AWTEvent arg0) {
+		System.out.println("recieved event: "+arg0.getID());
 		if(arg0.getID()==FocusEvent.FOCUS_GAINED){
 			showinactivity();
 			return;
