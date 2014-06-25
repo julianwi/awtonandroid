@@ -3,6 +3,7 @@ package julianwi.awtpeer;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.Rectangle;
+import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -23,16 +24,19 @@ public class AndroidGraphicsConfiguration extends GraphicsConfiguration {
 	}
 
 	@Override
-	public VolatileImage createCompatibleVolatileImage(int arg0, int arg1) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+	public VolatileImage createCompatibleVolatileImage(int width, int height) {
+		return createCompatibleVolatileImage(width, height, Transparency.OPAQUE);
 	}
 
 	@Override
-	public VolatileImage createCompatibleVolatileImage(int arg0, int arg1,
-			int arg2) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+	public VolatileImage createCompatibleVolatileImage(int width, int height, int transparency) {
+		if(transparency == Transparency.OPAQUE){
+			VolatileImage im = new AndroidVolatileImage(width, height);
+			return im;
+		}
+		else{
+			throw new UnsupportedOperationException("Not yet implemented.");
+		}
 	}
 
 	@Override

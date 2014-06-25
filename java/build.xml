@@ -41,11 +41,12 @@
     <exec executable="adb">
         <arg value="push"/>
         <arg value="dist/awtpeer.zip"/>
-        <arg value="/sdcard/awtpeer.zip"/>
+        <arg value="/data/data/julianwi.javainstaller/java/lib/awtpeer.zip"/>
     </exec>
     <exec executable="adb">
         <arg value="shell"/>
-        <arg value="java -Dawt.toolkit=julianwi.awtpeer.AndroidToolkit -cp /sdcard/awtpeer.zip:/sdcard/test.jar test.main.Main"/>
+        <!-- java -Dawt.toolkit=julianwi.awtpeer.AndroidToolkit -cp /sdcard/awtpeer.zip:/sdcard/test.jar test.main.Main -->
+        <arg value="java -jar /sdcard/test.jar"/>
     </exec>
 </target>
 </project>

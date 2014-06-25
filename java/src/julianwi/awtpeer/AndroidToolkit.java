@@ -70,6 +70,7 @@ import gnu.java.awt.ClasspathToolkit;
 import gnu.java.awt.EmbeddedWindow;
 import gnu.java.awt.peer.ClasspathFontPeer;
 import gnu.java.awt.peer.EmbeddedWindowPeer;
+import gnu.java.awt.peer.swing.SwingLabelPeer;
 
 public class AndroidToolkit extends ClasspathToolkit {
 	
@@ -93,9 +94,8 @@ public class AndroidToolkit extends ClasspathToolkit {
 	}
 
 	@Override
-	public ClasspathFontPeer getClasspathFontPeer(String arg0, Map<?, ?> arg1) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		////return null;
+	public ClasspathFontPeer getClasspathFontPeer(String name, Map<?, ?> attrs) {
+		return new AndroidFontPeer(name, attrs);
 	}
 
 	@Override
@@ -165,7 +165,7 @@ public class AndroidToolkit extends ClasspathToolkit {
 
 	@Override
 	protected FramePeer createFrame(Frame arg0) {
-		return new AndroidFramePeer();
+		return new AndroidFramePeer(arg0);
 	}
 
 	@Override
@@ -194,8 +194,7 @@ public class AndroidToolkit extends ClasspathToolkit {
 
 	@Override
 	protected LabelPeer createLabel(Label arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+		return new SwingLabelPeer(arg0);
 	}
 
 	@Override
@@ -277,9 +276,10 @@ public class AndroidToolkit extends ClasspathToolkit {
 	}
 
 	@Override
-	public FontMetrics getFontMetrics(Font arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+	public FontMetrics getFontMetrics(Font font) {
+		System.out.println("get font : "+font.getFontName());
+		ClasspathFontPeer peer = (ClasspathFontPeer) font.getPeer();
+		return peer.getFontMetrics(font);
 	}
 
 	@Override
@@ -326,6 +326,7 @@ public class AndroidToolkit extends ClasspathToolkit {
 
 	@Override
 	protected EventQueue getSystemEventQueueImpl() {
+		System.out.println("loaded event queue");
 		if (eventQueue == null)
 			eventQueue = new EventQueue();
 		return eventQueue;
