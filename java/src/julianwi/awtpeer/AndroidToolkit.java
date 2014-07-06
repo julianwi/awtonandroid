@@ -70,6 +70,7 @@ import gnu.java.awt.ClasspathToolkit;
 import gnu.java.awt.EmbeddedWindow;
 import gnu.java.awt.peer.ClasspathFontPeer;
 import gnu.java.awt.peer.EmbeddedWindowPeer;
+import gnu.java.awt.peer.swing.SwingButtonPeer;
 import gnu.java.awt.peer.swing.SwingLabelPeer;
 
 public class AndroidToolkit extends ClasspathToolkit {
@@ -117,7 +118,7 @@ public class AndroidToolkit extends ClasspathToolkit {
 
 	@Override
 	protected ButtonPeer createButton(Button arg0) {
-		return new AndroidButtonPeer(arg0);
+		return new SwingButtonPeer(arg0);
 	}
 
 	@Override

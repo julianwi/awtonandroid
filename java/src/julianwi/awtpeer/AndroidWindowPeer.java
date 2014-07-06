@@ -9,8 +9,10 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.event.ComponentEvent;
 import java.awt.event.PaintEvent;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
+import gnu.java.awt.ComponentReshapeEvent;
 import gnu.java.awt.peer.swing.SwingWindowPeer;
 
 public class AndroidWindowPeer extends SwingWindowPeer {
@@ -49,7 +52,15 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		int height, width;
+		EventQueue eq = AndroidToolkit.getDefaultToolkit().getSystemEventQueue();
+		Window w = (Window) super.awtComponent;
+		eq.postEvent(new WindowEvent(w, WindowEvent.WINDOW_OPENED));
+		eq.postEvent(new PaintEvent(w, PaintEvent.PAINT, new Rectangle(0, 0, w.getWidth(), w.getHeight())));
+		Graphics g = getGraphics();
+		g.clearRect(0, 0, w.getWidth(), w.getHeight());
+		g.dispose();
+		
+		int height = 0, width = 0;
 		try {
 			pipeout.write(0x02);
 			FileInputStream fr = new FileInputStream(new File("/data/data/julianwi.awtpeer/returnpipe"));
@@ -67,18 +78,20 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 			width = wrapped.getInt();
 			height = wrapped.getInt();
 			System.out.println("reading width: "+width+" heigth: "+height);
-			awtComponent.setSize(width, height);
-			System.out.println("setted size to: "+awtComponent.getWidth()+" "+awtComponent.getHeight());
+			//awtComponent.setSize(width, height);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		EventQueue eq = AndroidToolkit.getDefaultToolkit().getSystemEventQueue();
-		Window w = (Window) super.awtComponent;
-		eq.postEvent(new WindowEvent(w, WindowEvent.WINDOW_OPENED));
-		eq.postEvent(new PaintEvent(w, PaintEvent.PAINT, new Rectangle(0, 0, w.getWidth(), w.getHeight())));
-		Graphics g = getGraphics();
-		g.clearRect(0, 0, awtComponent.getWidth(), awtComponent.getHeight());
-		g.dispose();
+		Rectangle r = new Rectangle(0, 0, width, height);
+		Graphics g1 = awtComponent.getGraphics();
+		g1.clearRect(r.x, r.y, r.width, r.height);
+	    g1.dispose();
+		ComponentReshapeEvent cre = new ComponentReshapeEvent(awtComponent, awtComponent.getX(), awtComponent.getY(), width, height);
+		awtComponent.dispatchEvent(cre);
+		ComponentEvent ce = new ComponentEvent(awtComponent, ComponentEvent.COMPONENT_RESIZED);
+		awtComponent.dispatchEvent(ce);
+		System.out.println("setted size to: "+awtComponent.getWidth()+" "+awtComponent.getHeight());
+		//awtComponent.invalidate();
 	}
 	
 	@Override
@@ -91,9 +104,10 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 	}
 	
 	public Image createImage(int w, int h) {
-		System.out.println("creating image");
+		System.out.println("creating image "+w+" * "+h);
 		// FIXME: Should return a buffered image.
-		return createVolatileImage(w, h);
+		//return createVolatileImage(w, h);
+		return new OffScreenImage(w, h);
 	}
 	
 	@Override

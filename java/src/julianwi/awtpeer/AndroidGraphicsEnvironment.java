@@ -1,5 +1,7 @@
 package julianwi.awtpeer;
 
+import gnu.java.awt.java2d.RasterGraphics;
+
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
@@ -16,9 +18,8 @@ public class AndroidGraphicsEnvironment extends GraphicsEnvironment {
 	}
 
 	@Override
-	public Graphics2D createGraphics(BufferedImage arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+	public Graphics2D createGraphics(BufferedImage image) {
+		return new RasterGraphics(image.getRaster(), image.getColorModel());
 	}
 
 	@Override

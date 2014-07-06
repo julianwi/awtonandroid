@@ -73,6 +73,31 @@ public class PipeListener extends Thread {
         			pipeout.flush();
         			pipeout.close();
         		}
+        		if(buf == 0x03){
+        			byte[] array = new byte[4];
+        			for(int i=0;i<4;i++){
+        				array[i] = (byte) fr.read();
+        			}
+        			ByteBuffer wrapped = ByteBuffer.wrap(array);
+        			paint.setARGB(wrapped.get(), wrapped.get(), wrapped.get(), wrapped.get());
+        		}
+        		if(buf == 0x04){
+        			byte[] array = new byte[3*4];
+        			for(int i=0;i<3*4;i++){
+        				array[i] = (byte) fr.read();
+        			}
+        			ByteBuffer wrapped = ByteBuffer.wrap(array);
+        			int x = wrapped.getInt();
+        			int y = wrapped.getInt();
+        			byte[] label = new byte[wrapped.getInt()]; //read length of the lable
+        			for(int i=0;i<label.length;i++){
+        				label[i]=(byte) fr.read();
+        				System.out.println("new char "+label[i]);
+        			}
+        			context.view.canvas.drawText(new String(label), x, y, paint);
+        			context.view.postInvalidate();
+        			System.out.println("invalidated");
+        		}
         	}
         } catch (Exception e) {
             e.printStackTrace();

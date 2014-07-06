@@ -1,5 +1,6 @@
 package julianwi.awtpeer;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
@@ -7,22 +8,32 @@ import java.awt.Image;
 import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.Transparency;
+import java.awt.geom.PathIterator;
+import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
 import java.awt.image.Raster;
 import java.awt.peer.FontPeer;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 
+import gnu.java.awt.image.AsyncImage;
 import gnu.java.awt.java2d.AbstractGraphics2D;
 import gnu.java.awt.java2d.ScanlineCoverage;
 
 public class AndroidGraphics2D extends AbstractGraphics2D {
 	
 	private AndroidWindowPeer awp;
+	private Rectangle clip;
+	private boolean disposed;
 
 	public AndroidGraphics2D(AndroidWindowPeer androidWindowPeer) {
+		super();
 		awp = androidWindowPeer;
+		init();
+	    disposed = false;
 	}
 	
 	@Override
@@ -97,16 +108,16 @@ public class AndroidGraphics2D extends AbstractGraphics2D {
 		}
 	}
 
-	  public Graphics create()
-	  {
-		  throw new UnsupportedOperationException("Not yet implemented.");
-	  }
+	public Graphics create() {
+		return (AndroidGraphics2D)super.create();
+	}
 
-	  public void setClip(Shape c)
-	  {
-	    super.setClip(c);
-	    throw new UnsupportedOperationException("Not yet implemented.");
-	  }
+	public void setClip(Shape c) {
+		super.setClip(c);
+		if(c instanceof Rectangle){
+			clip = (Rectangle) c;
+		}
+	}
 
 	  /**
 	   * Notifies the backend that the raster has changed in the specified
@@ -133,28 +144,72 @@ public class AndroidGraphics2D extends AbstractGraphics2D {
 		  throw new UnsupportedOperationException("Not yet implemented.");
 	  }
 
-	  protected void init()
-	  {
-	    super.init();
-	    throw new UnsupportedOperationException("Not yet implemented.");
-	  }
+	protected void init() {
+		super.init();
+	}
 
 	public void setPaint(Paint p) {
 		super.setPaint(p);
+		if(p instanceof Color){
+			Color c = (Color) p;
+			ByteBuffer bb = ByteBuffer.allocate(4);
+			bb.putInt(c.getRGB());
+			try {
+				awp.pipeout.write(0x03);
+				awp.pipeout.write(bb.array());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		System.out.println("have to set forground color");
+		System.out.println(p);
 	}
 
 	  protected void fillShape(Shape s, boolean isFont)
 	  {
+		  super.fillShape(s, isFont);
 		  throw new UnsupportedOperationException("Not yet implemented.");
 	  }
 
-	  //private static WeakHashMap<Image,ZPixmap> imageCache = new WeakHashMap<Image,ZPixmap>();
-
-	  protected boolean rawDrawImage(Image image, int x, int y, ImageObserver obs)
-	  {
-		  throw new UnsupportedOperationException("Not yet implemented.");
-	  }
+	protected boolean rawDrawImage(Image image, int x, int y, ImageObserver obs) {
+		image = unwrap(image);
+		boolean ret;
+		if(image instanceof OffScreenImage){
+			OffScreenImage offimg = (OffScreenImage) image;
+			for (int i=0; i<offimg.methods.size(); i++) {
+				try {
+					offimg.methods.get(i).invoke(this, offimg.args.get(i));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			ret = true;
+		}
+		else if(image instanceof BufferedImage){
+			BufferedImage bi = (BufferedImage) image;
+			int transparency = bi.getTransparency();
+			int w = bi.getWidth();
+			int h = bi.getHeight();
+			if(transparency == Transparency.OPAQUE){
+				System.out.println("unknown transparency");
+				throw new UnsupportedOperationException("Not yet implemented.");
+			}
+			else{
+				for(int yy = 0; yy < h; yy++){
+					for(int xx = 0; xx < w; xx++){
+						if(bi.getRGB(xx, yy) != 0){
+							System.out.println("drawing pixel "+xx+"|"+yy + " color: "+Integer.toHexString(bi.getRGB(xx, yy)));
+						}
+					}
+				}
+            }
+            ret = true;
+		}
+		else{
+			ret = super.rawDrawImage(image, x, y, obs);
+		}
+		return ret;
+	}
 
 	public void setFont(Font f) {
 		super.setFont(f);
@@ -162,22 +217,27 @@ public class AndroidGraphics2D extends AbstractGraphics2D {
 			System.out.println("android Fonts are not implemented");
 	}
 
-	  public void drawString(String s, int x, int y)
-	  {
-		  throw new UnsupportedOperationException("Not yet implemented.");
-	  }
+	public void drawString(String s, int x, int y) {
+		System.out.println("drawing String");
+		ByteBuffer bb = ByteBuffer.allocate(3*4);
+		bb.putInt(x);
+		bb.putInt(y);
+		bb.putInt(s.length());
+		try {
+			awp.pipeout.write(0x04);
+			awp.pipeout.write(bb.array());
+			awp.pipeout.write(s.getBytes());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
-	  /**
-	   * Extracts an image instance out of an AsyncImage. If the image isn't
-	   * an AsyncImage, then the original instance is returned.
-	   *
-	   * @param im the image
-	   *
-	   * @return the image to render
-	   */
-	  private Image unwrap(Image im)
-	  {
-		  throw new UnsupportedOperationException("Not yet implemented.");
-	  }
+	private Image unwrap(Image im) {
+		Image image = im;
+		if(image instanceof AsyncImage){
+			throw new UnsupportedOperationException("Not yet implemented.");
+		}
+		return image;
+	}
 
 }

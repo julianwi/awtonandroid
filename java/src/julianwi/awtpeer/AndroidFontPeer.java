@@ -91,8 +91,7 @@ public class AndroidFontPeer extends ClasspathFontPeer {
 	}
 
 	@Override
-	public GlyphVector createGlyphVector(Font font, FontRenderContext frc,
-			CharacterIterator ci) {
+	public GlyphVector createGlyphVector(Font font, FontRenderContext frc, CharacterIterator ci) {
 		throw new UnsupportedOperationException("Not yet implemented.");
 		//return null;
 	}
@@ -129,8 +128,7 @@ public class AndroidFontPeer extends ClasspathFontPeer {
 	}
 
 	@Override
-	public LineMetrics getLineMetrics(Font font, CharacterIterator ci,
-			int begin, int limit, FontRenderContext rc) {
+	public LineMetrics getLineMetrics(Font font, CharacterIterator ci, int begin, int limit, FontRenderContext rc) {
 		throw new UnsupportedOperationException("Not yet implemented.");
 		//return null;
 	}
