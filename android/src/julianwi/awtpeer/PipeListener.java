@@ -31,8 +31,8 @@ public class PipeListener extends Thread {
         	FileReader fr = new FileReader(new File("/data/data/julianwi.awtpeer/pipe"));
         	while(true){
         		byte buf =(byte) fr.read();
+        		System.out.println("get from pipe: "+buf);
         		if(buf == 0x01){ //check if id is 01
-        			System.out.println("get from pipe: "+buf);
         			byte[] array = new byte[4*4];
         			for(int i=0;i<4*4;i++){
         				array[i] = (byte) fr.read();
@@ -64,9 +64,9 @@ public class PipeListener extends Thread {
         		if(buf == 0x02){
         			FileOutputStream pipeout = new FileOutputStream("/data/data/julianwi.awtpeer/returnpipe");
         			ByteBuffer bb = ByteBuffer.allocate(4*2);
-        			System.out.println("writing width: "+context.view.getWidth()+" heigth: "+context.view.getHeight());
-        			bb.putInt(context.view.getWidth());
-        			bb.putInt(context.view.getHeight());
+        			System.out.println("writing width: "+context.view.canvas.getWidth()+" heigth: "+context.view.canvas.getHeight());
+        			bb.putInt(context.view.canvas.getWidth());
+        			bb.putInt(context.view.canvas.getHeight());
         			pipeout.write(0x01);
         			pipeout.write(bb.array());
         			System.out.println("writing bytes "+bb.array().length);
@@ -97,6 +97,10 @@ public class PipeListener extends Thread {
         			context.view.canvas.drawText(new String(label), x, y, paint);
         			context.view.postInvalidate();
         			System.out.println("invalidated");
+        		}
+        		//exit if pipe is closed
+        		if(buf == -1){
+        			System.exit(0);
         		}
         	}
         } catch (Exception e) {

@@ -41,7 +41,7 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 	public void show() {
 		try {
 			Process p;
-			p = Runtime.getRuntime().exec(new String[]{"sh", "/system/bin/am", "start", "julianwi.awtpeer/.WindowActivity"});
+			p = Runtime.getRuntime().exec(new String[]{"sh", "/system/bin/am", "start", "--user", "0", "julianwi.awtpeer/.WindowActivity"});
 			p.waitFor();
 		} catch (Exception e) {
 			System.out.println("error while starting activity");
