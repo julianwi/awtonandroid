@@ -37,10 +37,20 @@ public class AndroidGraphics2D extends AbstractGraphics2D {
 	}
 	
 	@Override
-	  protected void rawDrawLine(int x0, int y0, int x1, int y1)
-	  {
-		throw new UnsupportedOperationException("Not yet implemented.");
-	  }
+	protected void rawDrawLine(int x0, int y0, int x1, int y1) {
+		System.out.println("drawing line");
+		try {
+			ByteBuffer bb = ByteBuffer.allocate(16);
+			bb.putInt(x0);
+			bb.putInt(y0);
+			bb.putInt(x1);
+			bb.putInt(y1);
+			awp.pipeout.write(0x05);
+			awp.pipeout.write(bb.array());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	  @Override
 	  protected void rawDrawRect(int x, int y, int w, int h)
@@ -116,7 +126,9 @@ public class AndroidGraphics2D extends AbstractGraphics2D {
 		super.setClip(c);
 		if(c instanceof Rectangle){
 			clip = (Rectangle) c;
+			return;
 		}
+		throw new UnsupportedOperationException("Not yet implemented.");
 	}
 
 	  /**

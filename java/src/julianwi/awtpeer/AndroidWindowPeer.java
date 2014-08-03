@@ -1,5 +1,6 @@
 package julianwi.awtpeer;
 
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
@@ -8,6 +9,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.SystemColor;
 import java.awt.Window;
 import java.awt.event.ComponentEvent;
 import java.awt.event.PaintEvent;
@@ -35,6 +37,7 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		super(window);
 		System.out.println("window constructed");
 	    insets = new Insets(0, 0, 0, 0);
+	    awtComponent.setBackground(SystemColor.window);
 	}
 	
 	@Override

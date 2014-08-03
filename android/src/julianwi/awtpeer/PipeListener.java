@@ -41,7 +41,9 @@ public class PipeListener extends Thread {
         			ByteBuffer wrapped = ByteBuffer.wrap(array);
         			//System.out.println("have to  fill rect "+wrapped.getInt()+wrapped.getInt()+wrapped.getInt()+wrapped.getInt());
         			paint.setStyle(Paint.Style.FILL);
-        			context.view.canvas.drawRect(new Rect(wrapped.getInt(), wrapped.getInt(), wrapped.getInt(), wrapped.getInt()), paint);
+        			int x1 = wrapped.getInt();
+        			int y1 = wrapped.getInt();
+        			context.view.canvas.drawRect(new Rect(x1, y1, x1 + wrapped.getInt(), y1+wrapped.getInt()), paint);
         			context.view.postInvalidate();
         			System.out.println("invalidated");
         			
@@ -95,6 +97,18 @@ public class PipeListener extends Thread {
         				System.out.println("new char "+label[i]);
         			}
         			context.view.canvas.drawText(new String(label), x, y, paint);
+        			context.view.postInvalidate();
+        			System.out.println("invalidated");
+        		}
+        		if(buf == 0x05){
+        			byte[] array = new byte[4*4];
+        			for(int i=0;i<4*4;i++){
+        				array[i] = (byte) fr.read();
+        				System.out.println("readed "+array[i]);
+        			}
+        			ByteBuffer wrapped = ByteBuffer.wrap(array);
+        			paint.setStyle(Paint.Style.FILL);
+        			context.view.canvas.drawLine(wrapped.getInt(), wrapped.getInt(), wrapped.getInt(), wrapped.getInt(), paint);
         			context.view.postInvalidate();
         			System.out.println("invalidated");
         		}
