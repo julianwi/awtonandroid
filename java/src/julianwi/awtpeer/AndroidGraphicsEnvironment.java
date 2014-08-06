@@ -1,15 +1,23 @@
 package julianwi.awtpeer;
 
+import gnu.java.awt.ClasspathGraphicsEnvironment;
 import gnu.java.awt.java2d.RasterGraphics;
 
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferInt;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
+import java.awt.image.SinglePixelPackedSampleModel;
+import java.awt.image.WritableRaster;
 import java.util.Locale;
 
-public class AndroidGraphicsEnvironment extends GraphicsEnvironment {
+public class AndroidGraphicsEnvironment extends ClasspathGraphicsEnvironment {
 	
 	private AndroidGraphicsDevice defaultDevice;
 	
@@ -19,7 +27,7 @@ public class AndroidGraphicsEnvironment extends GraphicsEnvironment {
 
 	@Override
 	public Graphics2D createGraphics(BufferedImage image) {
-		return new RasterGraphics(image.getRaster(), image.getColorModel());
+		return new FixedRasterGraphics(image.getRaster(), image.getColorModel());
 	}
 
 	@Override

@@ -16,6 +16,7 @@ import java.awt.event.PaintEvent;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -51,7 +52,7 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 			e.printStackTrace();
 		}
 		try {
-			pipeout = new FileOutputStream("/data/data/julianwi.awtpeer/pipe");
+			pipeout = new BufferedOutputStream(new FileOutputStream("/data/data/julianwi.awtpeer/pipe"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -66,6 +67,7 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		int height = 0, width = 0;
 		try {
 			pipeout.write(0x02);
+			pipeout.flush();
 			FileInputStream fr = new FileInputStream(new File("/data/data/julianwi.awtpeer/returnpipe"));
 			byte[] array = new byte[4*2];
 			while(fr.read() != 0x01){

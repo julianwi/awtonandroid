@@ -15,6 +15,8 @@ import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
 import java.awt.image.Raster;
 import java.awt.peer.FontPeer;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
@@ -60,7 +62,6 @@ public class AndroidGraphics2D extends AbstractGraphics2D {
 
 	@Override
 	protected void rawFillRect(int x, int y, int w, int h) {
-		System.out.println("drawing reckt");
 		try {
 			ByteBuffer bb = ByteBuffer.allocate(16);
 			bb.putInt(x);
@@ -150,11 +151,28 @@ public class AndroidGraphics2D extends AbstractGraphics2D {
 		  throw new UnsupportedOperationException("Not yet implemented.");
 	  }
 
-	  @Override
-	  public void renderScanline(int y, ScanlineCoverage c)
-	  {
-		  throw new UnsupportedOperationException("Not yet implemented.");
-	  }
+	@Override
+	public void renderScanline(int y, ScanlineCoverage c) {
+		ScanlineCoverage.Iterator iter = c.iterate();
+		int coverageAlpha = 0;
+		int maxCoverage = c.getMaxCoverage();
+		while (iter.hasNext()){
+			ScanlineCoverage.Range range = iter.next();
+			coverageAlpha = range.getCoverage();
+			int x0 = range.getXPos();
+			int l = range.getLength();
+			/*if(coverageAlpha > 0){
+				throw new UnsupportedOperationException("Not yet implemented.");
+			}*/
+			try {
+				awp.pipeout.write(0x06);
+				awp.pipeout.write(coverageAlpha*255);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			rawFillRect(x0, y, l, 1);
+		}
+	}
 
 	protected void init() {
 		super.init();
@@ -177,11 +195,9 @@ public class AndroidGraphics2D extends AbstractGraphics2D {
 		System.out.println(p);
 	}
 
-	  protected void fillShape(Shape s, boolean isFont)
-	  {
-		  super.fillShape(s, isFont);
-		  throw new UnsupportedOperationException("Not yet implemented.");
-	  }
+	protected void fillShape(Shape s, boolean isFont) {
+		super.fillShape(s, isFont);
+	}
 
 	protected boolean rawDrawImage(Image image, int x, int y, ImageObserver obs) {
 		image = unwrap(image);
@@ -207,12 +223,18 @@ public class AndroidGraphics2D extends AbstractGraphics2D {
 				throw new UnsupportedOperationException("Not yet implemented.");
 			}
 			else{
-				for(int yy = 0; yy < h; yy++){
+				try {
+					awp.pipeout.write(0x07);
+					DataOutputStream stream = new DataOutputStream(awp.pipeout);
+					stream.writeInt(w);
+					stream.writeInt(h);
 					for(int xx = 0; xx < w; xx++){
-						if(bi.getRGB(xx, yy) != 0){
-							System.out.println("drawing pixel "+xx+"|"+yy + " color: "+Integer.toHexString(bi.getRGB(xx, yy)));
+						for(int yy = 0; yy < h; yy++){
+							stream.writeInt(bi.getRGB(xx, yy));
 						}
 					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
             }
             ret = true;

@@ -1,8 +1,12 @@
 package julianwi.awtpeer;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import android.graphics.Bitmap;
@@ -28,7 +32,8 @@ public class PipeListener extends Thread {
 	@Override
     public void run() {
         try {
-        	FileReader fr = new FileReader(new File("/data/data/julianwi.awtpeer/pipe"));
+        	Thread.sleep(1000);
+        	InputStream fr = new DataInputStream(new BufferedInputStream(new FileInputStream(new File("/data/data/julianwi.awtpeer/pipe"))));
         	while(true){
         		byte buf =(byte) fr.read();
         		System.out.println("get from pipe: "+buf);
@@ -44,24 +49,6 @@ public class PipeListener extends Thread {
         			int x1 = wrapped.getInt();
         			int y1 = wrapped.getInt();
         			context.view.canvas.drawRect(new Rect(x1, y1, x1 + wrapped.getInt(), y1+wrapped.getInt()), paint);
-        			context.view.postInvalidate();
-        			System.out.println("invalidated");
-        			
-					//Method m = Canvas.class.getMethod("drawRect", new Class[]{Rect.class, Paint.class});
-					//Object[] args = new Object[]{new Rect(0, 0, 100, 200), paint};
-        			/*byte[] label = new byte[fr.read()]; //read length of the lable
-        			for(int i=0;i<label.length;i++){
-        				label[i]=(byte) fr.read();
-        				System.out.println("new char "+label[i]);
-        			}
-        			final Button b1 = new Button(context);
-        			b1.setText(new String(label));
-        			context.runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							//context.view.addView(b1);
-						}
-					});*/
         		}
         		if(buf == 0x02){
         			FileOutputStream pipeout = new FileOutputStream("/data/data/julianwi.awtpeer/returnpipe");
@@ -97,8 +84,6 @@ public class PipeListener extends Thread {
         				System.out.println("new char "+label[i]);
         			}
         			context.view.canvas.drawText(new String(label), x, y, paint);
-        			context.view.postInvalidate();
-        			System.out.println("invalidated");
         		}
         		if(buf == 0x05){
         			byte[] array = new byte[4*4];
@@ -109,6 +94,25 @@ public class PipeListener extends Thread {
         			ByteBuffer wrapped = ByteBuffer.wrap(array);
         			paint.setStyle(Paint.Style.FILL);
         			context.view.canvas.drawLine(wrapped.getInt(), wrapped.getInt(), wrapped.getInt(), wrapped.getInt(), paint);
+        		}
+        		if(buf == 0x06){
+        			paint.setAlpha(fr.read());
+        		}
+        		if(buf == 0x07){
+        			DataInputStream stream = (DataInputStream) fr;
+        			int width = stream.readInt();
+        			int height = stream.readInt();
+        			System.out.println(width+" "+height);
+        			for(int x = 0; x < width; x++){
+						for(int y = 0; y < height; y++){
+							int color = stream.readInt();
+							if(color != 0){
+								context.view.bitmap.setPixel(x, y, color);
+							}
+						}
+        			}
+        		}
+        		if(buf == 0x00){
         			context.view.postInvalidate();
         			System.out.println("invalidated");
         		}
