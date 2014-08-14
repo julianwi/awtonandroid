@@ -2,6 +2,8 @@
 *.class
 .settings
 .project
+.cproject
+.externalToolBuilders
 
 # Package Files #
 *.jar
@@ -17,3 +19,4 @@ hs_err_pid*
 
 # Generated files
 dist/
+*.so

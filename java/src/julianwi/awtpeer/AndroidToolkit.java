@@ -97,7 +97,7 @@ public class AndroidToolkit extends ClasspathToolkit {
 
 	@Override
 	public ClasspathFontPeer getClasspathFontPeer(String name, Map<?, ?> attrs) {
-		return new AndroidFontPeer(name, attrs);
+		return new FreetypeFontPeer(name, attrs);
 	}
 
 	@Override

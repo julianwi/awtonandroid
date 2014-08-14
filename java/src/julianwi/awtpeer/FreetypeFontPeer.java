@@ -5,7 +5,6 @@ import java.awt.FontMetrics;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.font.LineMetrics;
-import java.awt.font.TextAttribute;
 import java.awt.geom.Rectangle2D;
 import java.text.CharacterIterator;
 import java.util.Locale;
@@ -13,33 +12,23 @@ import java.util.Map;
 
 import gnu.java.awt.peer.ClasspathFontPeer;
 
-public class AndroidFontPeer extends ClasspathFontPeer {
-
-	private AndroidFontMetrics fontMetrics;
-
-	public AndroidFontPeer(String name, Map<?, ?> atts) {
-		super(name, atts);
-	    int size = 12;
-	    Float sizeFl = (Float) atts.get(TextAttribute.SIZE);
-	    if (sizeFl != null)
-	      size = sizeFl.intValue();
-
-	    int style = 0;
-	    // Detect italic attribute.
-	    Float posture = (Float) atts.get(TextAttribute.POSTURE);
-	    if (posture != null && !posture.equals(TextAttribute.POSTURE_REGULAR))
-	      style |= Font.ITALIC;
-
-	    // Detect bold attribute.
-	    Float weight = (Float) atts.get(TextAttribute.WEIGHT);
-	    if (weight != null && weight.compareTo(TextAttribute.WEIGHT_REGULAR) > 0)
-	      style |= Font.BOLD;
-
-	    //this.name = name;
-	    this.style = style;
-	    this.size = size;
-	    System.out.println("creating font "+name+" "+size+" "+style);
+public class FreetypeFontPeer extends ClasspathFontPeer {
+	
+	static {
+		System.loadLibrary("ftpeer");
+		int error = InitFreeType();
+		System.out.println("freetype init error code "+error);
+		if(error != 0){
+				throw new UnsupportedOperationException("an error occurred during freetype initialization error code " + error);
+		}
 	}
+
+	public FreetypeFontPeer(String name, Map<?, ?> attrs) {
+		super(name, attrs);
+		// TODO Auto-generated constructor stub
+	}
+	
+	public native static int InitFreeType();
 
 	@Override
 	public boolean canDisplay(Font font, int c) {
@@ -91,7 +80,8 @@ public class AndroidFontPeer extends ClasspathFontPeer {
 	}
 
 	@Override
-	public GlyphVector createGlyphVector(Font font, FontRenderContext frc, CharacterIterator ci) {
+	public GlyphVector createGlyphVector(Font font, FontRenderContext frc,
+			CharacterIterator ci) {
 		throw new UnsupportedOperationException("Not yet implemented.");
 		//return null;
 	}
@@ -123,7 +113,8 @@ public class AndroidFontPeer extends ClasspathFontPeer {
 	}
 
 	@Override
-	public LineMetrics getLineMetrics(Font font, CharacterIterator ci, int begin, int limit, FontRenderContext rc) {
+	public LineMetrics getLineMetrics(Font font, CharacterIterator ci,
+			int begin, int limit, FontRenderContext rc) {
 		throw new UnsupportedOperationException("Not yet implemented.");
 		//return null;
 	}
