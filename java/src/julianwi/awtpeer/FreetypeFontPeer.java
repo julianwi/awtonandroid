@@ -1,5 +1,6 @@
 package julianwi.awtpeer;
 
+import java.awt.AWTError;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.font.FontRenderContext;
@@ -14,21 +15,41 @@ import gnu.java.awt.peer.ClasspathFontPeer;
 
 public class FreetypeFontPeer extends ClasspathFontPeer {
 	
+	/*Pointer to native font*/
+	public long nativefont = 0;
+	
 	static {
 		System.loadLibrary("ftpeer");
-		int error = InitFreeType();
+		int error = initFreeType();
 		System.out.println("freetype init error code "+error);
 		if(error != 0){
-				throw new UnsupportedOperationException("an error occurred during freetype initialization error code " + error);
+			throw new AWTError("an error occurred during freetype initialization error code " + error);
 		}
 	}
 
 	public FreetypeFontPeer(String name, Map<?, ?> attrs) {
 		super(name, attrs);
-		// TODO Auto-generated constructor stub
+		nativefont = createfont();
+		System.out.println("native font: "+nativefont);
+		if(nativefont == 0){
+			throw new AWTError("errorr while allocating memory for freetype font");
+		}
+		int error = initFont(nativefont, "/system/fonts/DroidSans.ttf");
+		System.out.println("init font error code "+error);
+		if(error != 0){
+			throw new AWTError("an error occurred during font initialization: error code " + error);
+		}
+		error = setsize(nativefont, (int) this.size);
+		System.out.println("resize error code "+error);
+		if(error != 0){
+			throw new AWTError("an error occurred during font resize: error code " + error);
+		}
 	}
 	
-	public native static int InitFreeType();
+	public native static int initFreeType();
+	public native long createfont();
+	public native int initFont(long font, String TTFfile);
+	public native int setsize(long font, int size);
 
 	@Override
 	public boolean canDisplay(Font font, int c) {
@@ -80,10 +101,12 @@ public class FreetypeFontPeer extends ClasspathFontPeer {
 	}
 
 	@Override
-	public GlyphVector createGlyphVector(Font font, FontRenderContext frc,
-			CharacterIterator ci) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+	public GlyphVector createGlyphVector(Font font, FontRenderContext frc, CharacterIterator ci) {
+		StringBuilder builder = new StringBuilder();
+		for(char c = ci.first(); c != CharacterIterator.DONE; c = ci.next()) {
+			builder.append(c);
+		}
+		return new FreetypeGlyphVector(font, builder.toString(), frc);
 	}
 
 	@Override

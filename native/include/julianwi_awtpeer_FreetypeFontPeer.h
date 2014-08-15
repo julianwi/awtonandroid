@@ -9,11 +9,35 @@ extern "C" {
 #endif
 /*
  * Class:     julianwi_awtpeer_FreetypeFontPeer
- * Method:    InitFreeType
+ * Method:    initFreeType
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_julianwi_awtpeer_FreetypeFontPeer_InitFreeType
+JNIEXPORT jint JNICALL Java_julianwi_awtpeer_FreetypeFontPeer_initFreeType
   (JNIEnv *, jclass);
+
+/*
+ * Class:     julianwi_awtpeer_FreetypeFontPeer
+ * Method:    createfont
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL Java_julianwi_awtpeer_FreetypeFontPeer_createfont
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     julianwi_awtpeer_FreetypeFontPeer
+ * Method:    initFont
+ * Signature: (JLjava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_julianwi_awtpeer_FreetypeFontPeer_initFont
+  (JNIEnv *, jobject, jlong, jstring);
+
+/*
+ * Class:     julianwi_awtpeer_FreetypeFontPeer
+ * Method:    setsize
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_julianwi_awtpeer_FreetypeFontPeer_setsize
+  (JNIEnv *, jobject, jlong, jint);
 
 #ifdef __cplusplus
 }
