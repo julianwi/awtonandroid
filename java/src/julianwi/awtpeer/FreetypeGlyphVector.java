@@ -1,20 +1,45 @@
 package julianwi.awtpeer;
 
+import gnu.java.awt.peer.gtk.GdkFontPeer;
+
 import java.awt.Font;
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphJustificationInfo;
 import java.awt.font.GlyphMetrics;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.text.CharacterIterator;
 
 public class FreetypeGlyphVector extends GlyphVector {
 	
-	public FreetypeGlyphVector(Font font, String string, FontRenderContext frc) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+	private char[] chars;
+	private Font f;
+	private FreetypeFontPeer peer;
+	private int[] glyphCodes;
+	
+	public FreetypeGlyphVector(Font font, FontRenderContext frc, CharacterIterator ci) {
+		f = font;
+		if(!(font.getPeer() instanceof FreetypeFontPeer)){
+			throw new IllegalArgumentException("Not a valid font.");
+		}
+		peer = (FreetypeFontPeer)font.getPeer();
+		chars = new char[ci.getEndIndex()];
+		glyphCodes = new int[ci.getEndIndex()];
+		for(char c = ci.first(); c != CharacterIterator.DONE; c = ci.next()) {
+			chars[ci.getIndex()] = c;
+			glyphCodes[ci.getIndex()] = getglyphindex(peer.nativefont, c);
+			System.out.println(c+":index"+glyphCodes[ci.getIndex()]);
+		}
 	}
+	
+	public native int getglyphindex(long font, int character);
+	private native GeneralPath getGlyphOutlineNative(long font, int glyphIndex);
 
 	@Override
 	public boolean equals(GlyphVector set) {
@@ -67,8 +92,11 @@ public class FreetypeGlyphVector extends GlyphVector {
 
 	@Override
 	public Shape getGlyphOutline(int glyphIndex) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+		GeneralPath gp = getGlyphOutlineNative(peer.nativefont, glyphCodes[glyphIndex]);
+		AffineTransform tx = AffineTransform.getTranslateInstance(glyphIndex*40, 0);
+		gp.transform(tx);
+		System.out.println(gp);
+		return gp;
 	}
 
 	@Override
@@ -104,20 +132,25 @@ public class FreetypeGlyphVector extends GlyphVector {
 
 	@Override
 	public int getNumGlyphs() {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return 0;
+		return glyphCodes.length;
 	}
 
 	@Override
 	public Shape getOutline() {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+		GeneralPath path = new GeneralPath();
+		for( int i = 0; i < getNumGlyphs(); i++ ){
+			path.append(getGlyphOutline(i), false);
+		}
+		return path;
+		//return getGlyphOutline(4);
 	}
 
 	@Override
 	public Shape getOutline(float x, float y) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+		AffineTransform tx = AffineTransform.getTranslateInstance( x, y );
+		GeneralPath gp = (GeneralPath)getOutline();
+		gp.transform( tx );
+		return gp;
 	}
 
 	@Override

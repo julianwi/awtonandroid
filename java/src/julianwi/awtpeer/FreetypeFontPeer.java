@@ -102,11 +102,7 @@ public class FreetypeFontPeer extends ClasspathFontPeer {
 
 	@Override
 	public GlyphVector createGlyphVector(Font font, FontRenderContext frc, CharacterIterator ci) {
-		StringBuilder builder = new StringBuilder();
-		for(char c = ci.first(); c != CharacterIterator.DONE; c = ci.next()) {
-			builder.append(c);
-		}
-		return new FreetypeGlyphVector(font, builder.toString(), frc);
+		return new FreetypeGlyphVector(font, frc, ci);
 	}
 
 	@Override
