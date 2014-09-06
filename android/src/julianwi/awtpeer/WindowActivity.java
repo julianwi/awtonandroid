@@ -1,12 +1,16 @@
 package julianwi.awtpeer;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.SurfaceHolder;
+import android.view.Window;
+import android.view.SurfaceHolder.Callback;
+import android.view.SurfaceView;
 
-public class WindowActivity extends Activity {
-	
-	public GraphicsView view;
+public class WindowActivity extends Activity implements Callback {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -23,8 +27,33 @@ public class WindowActivity extends Activity {
 				e.printStackTrace();
 			}
 		}
-		view = new GraphicsView(this);
-		setContentView(view);
-		new PipeListener(this).start();
+		try {
+			Window.class.getMethod("takeSurface", Class.forName("android.view.SurfaceHolder$Callback2")).invoke(getWindow(), Class.forName("julianwi.awtpeer.WindowNewApi").getConstructor().newInstance());
+			System.out.println("succes!");
+		} catch (Exception e) {
+			System.out.println("error");
+			e.printStackTrace();
+			//view = new GraphicsView(this);
+			SurfaceView view = new SurfaceView(this);
+			view.getHolder().addCallback(this);
+			setContentView(view);
+		}
+	}
+
+	@Override
+	public void surfaceCreated(SurfaceHolder holder) {
+		new PipeListener(holder).start();
+	}
+
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int width,
+			int height) {
+		System.out.println("surfaceChanged "+width+" * "+height);
+	}
+
+	@Override
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		// TODO Auto-generated method stub
+		
 	}
 }
