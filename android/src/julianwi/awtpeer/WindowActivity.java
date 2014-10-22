@@ -1,8 +1,6 @@
 package julianwi.awtpeer;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.SurfaceHolder;
@@ -17,7 +15,7 @@ public class WindowActivity extends Activity implements Callback {
 		super.onCreate(savedInstanceState);
 		if(!new File("/data/data/julianwi.awtpeer/pipe").exists()){
 			try {
-				String bbpath = createPackageContext("julianwi.javainstaller", 0).getSharedPreferences("settings", 1).getString("path1", "busybox");
+				String bbpath = createPackageContext("julianwi.javainstaller", 0).getSharedPreferences("settings", 1).getString("path1", "/data/data/jackpal.androidterm/bin")+"/busybox";
 				System.out.println(bbpath);
 				Runtime.getRuntime().exec(bbpath+" mkfifo /data/data/julianwi.awtpeer/pipe");
 				Runtime.getRuntime().exec(bbpath+" mkfifo /data/data/julianwi.awtpeer/returnpipe");
