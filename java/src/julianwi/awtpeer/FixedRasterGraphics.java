@@ -28,7 +28,8 @@ public class FixedRasterGraphics extends RasterGraphics {
 	    
 	    int x0 = c.getMinX();
 	    int x1 = c.getMaxX();
-	    Raster paintRaster = pCtx.getRaster(x0, y, x1 - x0, 1);
+	    Raster paintRaster = pCtx.getRaster(x0, y, x1 - x0+1, 1);
+	    System.out.println("scanline width "+(x1-x0));
 
 	    // Do the anti aliasing thing.
 	    float coverageAlpha = 0;
@@ -81,5 +82,11 @@ public class FixedRasterGraphics extends RasterGraphics {
 	   
 	    return this.paintContext;
 	  }
+	
+	@Override
+	public void drawString(String text, int x, int y) {
+		System.out.println("drawin string "+text+" "+x+" "+y);
+		super.drawString(text, x, y);
+	}
 
 }

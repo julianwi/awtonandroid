@@ -8,6 +8,7 @@ import java.awt.font.GlyphVector;
 import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
 import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.Locale;
 import java.util.Map;
 
@@ -113,16 +114,13 @@ public class FreetypeFontPeer extends ClasspathFontPeer {
 	}
 
 	@Override
-	public GlyphVector layoutGlyphVector(Font font, FontRenderContext frc,
-			char[] chars, int start, int limit, int flags) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+	public GlyphVector layoutGlyphVector(Font font, FontRenderContext frc, char[] chars, int start, int limit, int flags) {
+		return new FreetypeGlyphVector(font, frc, new StringCharacterIterator(new String(chars), start, limit, 0));
 	}
 
 	@Override
 	public FontMetrics getFontMetrics(Font font) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+		return new FreetypeFontMetrics(font);
 	}
 
 	@Override
@@ -132,10 +130,8 @@ public class FreetypeFontPeer extends ClasspathFontPeer {
 	}
 
 	@Override
-	public LineMetrics getLineMetrics(Font font, CharacterIterator ci,
-			int begin, int limit, FontRenderContext rc) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+	public LineMetrics getLineMetrics(Font font, CharacterIterator ci, int begin, int limit, FontRenderContext rc) {
+		return new FreetypeLineMetrics();
 	}
 
 	@Override

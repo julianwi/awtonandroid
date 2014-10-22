@@ -126,8 +126,9 @@ public class FreetypeGlyphVector extends GlyphVector {
 
 	@Override
 	public Rectangle2D getLogicalBounds() {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+		if( getNumGlyphs() == 0 )
+		      return new Rectangle2D.Double(0, 0, 0, 0);
+		return new Rectangle2D.Double(0, 0, getNumGlyphs()*40, 40);
 	}
 
 	@Override

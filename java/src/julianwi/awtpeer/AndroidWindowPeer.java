@@ -112,7 +112,8 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		System.out.println("creating image "+w+" * "+h);
 		// FIXME: Should return a buffered image.
 		//return createVolatileImage(w, h);
-		return new OffScreenImage(w, h);
+		//return new OffScreenImage(w, h);
+		return new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 	}
 	
 	@Override

@@ -114,11 +114,12 @@ public class PipeListener extends Thread {
 						for(int y = 0; y < height; y++){
 							int color = stream.readInt();
 							if(color != 0){
+								System.out.println("set pixel "+x+" * "+y);
 								bm.setPixel(x, y, color);
 							}
 						}
         			}
-        			c.drawBitmap(bm, 0, 0, null);
+        			c.drawBitmap(bm, 0, 100, null);
         		}
         		if(buf == 0x00){
         			//context.view.postInvalidate();
