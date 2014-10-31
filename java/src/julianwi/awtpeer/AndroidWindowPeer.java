@@ -2,6 +2,8 @@ package julianwi.awtpeer;
 
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
@@ -15,7 +17,10 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.PaintEvent;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
 import java.awt.image.VolatileImage;
+import java.awt.image.WritableRaster;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,12 +32,15 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import gnu.java.awt.ComponentReshapeEvent;
+import gnu.java.awt.peer.ClasspathFontPeer;
 import gnu.java.awt.peer.swing.SwingWindowPeer;
 
 public class AndroidWindowPeer extends SwingWindowPeer {
 
 	private Insets insets;
 	public OutputStream pipeout;
+	public Rectangle bounds;
+	public WritableRaster destinationRaster;
 
 	public AndroidWindowPeer(Window window) {
 		super(window);
@@ -60,9 +68,9 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		Window w = (Window) super.awtComponent;
 		eq.postEvent(new WindowEvent(w, WindowEvent.WINDOW_OPENED));
 		eq.postEvent(new PaintEvent(w, PaintEvent.PAINT, new Rectangle(0, 0, w.getWidth(), w.getHeight())));
-		Graphics g = getGraphics();
-		g.clearRect(0, 0, w.getWidth(), w.getHeight());
-		g.dispose();
+		//Graphics g = getGraphics();
+		//g.clearRect(0, 0, w.getWidth(), w.getHeight());
+		//g.dispose();
 		
 		int height = 0, width = 0;
 		try {
@@ -88,9 +96,24 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 			e.printStackTrace();
 		}
 		Rectangle r = new Rectangle(0, 0, width, height);
-		Graphics g1 = awtComponent.getGraphics();
-		g1.clearRect(r.x, r.y, r.width, r.height);
-	    g1.dispose();
+		bounds = r;
+		int[] bandMasks = new int[]{ 0xFF0000, 0xFF00, 0xFF };
+		destinationRaster = Raster.createPackedRaster(DataBuffer.TYPE_INT, width, height, bandMasks, null);
+		// Initialize raster with white.
+		int x0 = destinationRaster.getMinX();
+		int x1 = destinationRaster.getWidth() + x0;
+		int y0 = destinationRaster.getMinY();
+		int y1 = destinationRaster.getHeight() + y0;
+		int numBands = destinationRaster.getNumBands();
+		for (int y = y0; y < y1; y++) {
+			for (int x = x0; x < x1; x++) {
+				for (int b = 0; b < numBands; b++)
+					destinationRaster.setSample(x, y, b, 255);
+			}
+		}
+		//Graphics g1 = awtComponent.getGraphics();
+		//g1.clearRect(r.x, r.y, r.width, r.height);
+	    //g1.dispose();
 		ComponentReshapeEvent cre = new ComponentReshapeEvent(awtComponent, awtComponent.getX(), awtComponent.getY(), width, height);
 		awtComponent.dispatchEvent(cre);
 		ComponentEvent ce = new ComponentEvent(awtComponent, ComponentEvent.COMPONENT_RESIZED);
@@ -118,10 +141,8 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 	
 	@Override
 	public VolatileImage createVolatileImage(int width, int height) {
-		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		GraphicsDevice gd = ge.getDefaultScreenDevice();
-		GraphicsConfiguration gc = gd.getDefaultConfiguration();
-		return gc.createCompatibleVolatileImage(width, height);
+		throw new UnsupportedOperationException("Not yet implemented.");
+		//return null
 	}
 
 	@Override
@@ -146,6 +167,17 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 	public boolean requestWindowFocus() {
 		throw new UnsupportedOperationException("Not yet implemented.");
 		//return false;
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Override
+	public FontMetrics getFontMetrics(Font font) {
+		if(font.getPeer() instanceof ClasspathFontPeer){
+			return ((ClasspathFontPeer) font.getPeer()).getFontMetrics(font);
+		}
+		else{
+			throw new UnsupportedOperationException("Not yet implemented.");
+		}
 	}
 
 }

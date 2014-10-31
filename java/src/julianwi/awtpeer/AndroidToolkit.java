@@ -72,6 +72,7 @@ import gnu.java.awt.peer.ClasspathFontPeer;
 import gnu.java.awt.peer.EmbeddedWindowPeer;
 import gnu.java.awt.peer.swing.SwingButtonPeer;
 import gnu.java.awt.peer.swing.SwingCanvasPeer;
+import gnu.java.awt.peer.swing.SwingCheckboxPeer;
 import gnu.java.awt.peer.swing.SwingLabelPeer;
 
 public class AndroidToolkit extends ClasspathToolkit {
@@ -128,9 +129,8 @@ public class AndroidToolkit extends ClasspathToolkit {
 	}
 
 	@Override
-	protected CheckboxPeer createCheckbox(Checkbox arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+	protected CheckboxPeer createCheckbox(Checkbox checkbox) {
+		return new SwingCheckboxPeer(checkbox);
 	}
 
 	@Override

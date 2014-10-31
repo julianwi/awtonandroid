@@ -28,7 +28,7 @@ public class AndroidGraphicsEnvironment extends ClasspathGraphicsEnvironment {
 	@Override
 	public Graphics2D createGraphics(BufferedImage image) {
 		System.out.println("creating image graphics");
-		return new FixedRasterGraphics(image.getRaster(), image.getColorModel());
+		return new RasterGraphics(image.getRaster(), image.getColorModel());
 	}
 
 	@Override

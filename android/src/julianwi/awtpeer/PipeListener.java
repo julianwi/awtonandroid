@@ -8,13 +8,17 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 
+import android.app.NativeActivity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Bitmap.Config;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaPlayer;
 import android.view.SurfaceHolder;
 
 public class PipeListener extends Thread {
@@ -121,6 +125,18 @@ public class PipeListener extends Thread {
         			}
         			c.drawBitmap(bm, 0, 100, null);
         		}
+        		if(buf == 0x08){
+        			byte[] buffer = new byte[c.getWidth()*c.getHeight()*4];
+        			fr.read(buffer);
+        			IntBuffer intBuf =
+					   ByteBuffer.wrap(buffer)
+					     .order(ByteOrder.BIG_ENDIAN)
+					     .asIntBuffer();
+					int[] array = new int[intBuf.remaining()];
+					intBuf.get(array);
+					c.drawBitmap(array, 0, c.getWidth(), 0, 0, c.getWidth(), c.getHeight(), false, null);
+        			buf = 0x00;
+        		}
         		if(buf == 0x00){
         			//context.view.postInvalidate();
         			if(c != null){
@@ -131,6 +147,7 @@ public class PipeListener extends Thread {
         		}
         		//exit if pipe is closed
         		if(buf == -1){
+        			fr.close();
         			System.exit(0);
         		}
         	}

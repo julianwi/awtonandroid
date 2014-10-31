@@ -30,13 +30,8 @@ public class AndroidGraphicsConfiguration extends GraphicsConfiguration {
 
 	@Override
 	public VolatileImage createCompatibleVolatileImage(int width, int height, int transparency) {
-		if(transparency == Transparency.OPAQUE){
-			VolatileImage im = new AndroidVolatileImage(width, height);
-			return im;
-		}
-		else{
-			throw new UnsupportedOperationException("Not yet implemented.");
-		}
+		throw new UnsupportedOperationException("Not yet implemented.");
+		//return null;
 	}
 
 	@Override
