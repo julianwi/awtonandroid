@@ -1,35 +1,33 @@
 package julianwi.awtpeer;
 
-import java.awt.Component;
+import java.awt.AWTEvent;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.SystemColor;
 import java.awt.Window;
-import java.awt.event.ComponentEvent;
 import java.awt.event.PaintEvent;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
+import java.awt.image.SampleModel;
+import java.awt.image.SinglePixelPackedSampleModel;
 import java.awt.image.VolatileImage;
 import java.awt.image.WritableRaster;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 
 import gnu.java.awt.ComponentReshapeEvent;
 import gnu.java.awt.peer.ClasspathFontPeer;
@@ -37,7 +35,6 @@ import gnu.java.awt.peer.swing.SwingWindowPeer;
 
 public class AndroidWindowPeer extends SwingWindowPeer {
 
-	private Insets insets;
 	public OutputStream pipeout;
 	public Rectangle bounds;
 	public WritableRaster destinationRaster;
@@ -45,7 +42,7 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 	public AndroidWindowPeer(Window window) {
 		super(window);
 		System.out.println("window constructed");
-	    insets = new Insets(0, 0, 0, 0);
+	    new Insets(0, 0, 0, 0);
 	    awtComponent.setBackground(SystemColor.window);
 	}
 	
@@ -64,10 +61,6 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		EventQueue eq = AndroidToolkit.getDefaultToolkit().getSystemEventQueue();
-		Window w = (Window) super.awtComponent;
-		eq.postEvent(new WindowEvent(w, WindowEvent.WINDOW_OPENED));
-		eq.postEvent(new PaintEvent(w, PaintEvent.PAINT, new Rectangle(0, 0, w.getWidth(), w.getHeight())));
 		//Graphics g = getGraphics();
 		//g.clearRect(0, 0, w.getWidth(), w.getHeight());
 		//g.dispose();
@@ -98,33 +91,26 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		Rectangle r = new Rectangle(0, 0, width, height);
 		bounds = r;
 		int[] bandMasks = new int[]{ 0xFF0000, 0xFF00, 0xFF };
-		destinationRaster = Raster.createPackedRaster(DataBuffer.TYPE_INT, width, height, bandMasks, null);
-		// Initialize raster with white.
-		int x0 = destinationRaster.getMinX();
-		int x1 = destinationRaster.getWidth() + x0;
-		int y0 = destinationRaster.getMinY();
-		int y1 = destinationRaster.getHeight() + y0;
-		int numBands = destinationRaster.getNumBands();
-		for (int y = y0; y < y1; y++) {
-			for (int x = x0; x < x1; x++) {
-				for (int b = 0; b < numBands; b++)
-					destinationRaster.setSample(x, y, b, 255);
-			}
-		}
+		SampleModel sm = new SinglePixelPackedSampleModel(DataBuffer.TYPE_INT, width, height, bandMasks);
+		DataBuffer db = new DirectDataBufferInt(width*height);
+		destinationRaster = Raster.createWritableRaster(sm, db, null);
 		//Graphics g1 = awtComponent.getGraphics();
 		//g1.clearRect(r.x, r.y, r.width, r.height);
 	    //g1.dispose();
 		ComponentReshapeEvent cre = new ComponentReshapeEvent(awtComponent, awtComponent.getX(), awtComponent.getY(), width, height);
 		awtComponent.dispatchEvent(cre);
-		ComponentEvent ce = new ComponentEvent(awtComponent, ComponentEvent.COMPONENT_RESIZED);
-		awtComponent.dispatchEvent(ce);
+		EventQueue eq = AndroidToolkit.getDefaultToolkit().getSystemEventQueue();
+		Window w = (Window) super.awtComponent;
+		eq.postEvent(new WindowEvent(w, WindowEvent.WINDOW_OPENED));
+		eq.postEvent(new PaintEvent(w, PaintEvent.PAINT, new Rectangle(0, 0, w.getWidth(), w.getHeight())));
+		System.out.println("showing: "+awtComponent.isShowing());
 		System.out.println("setted size to: "+awtComponent.getWidth()+" "+awtComponent.getHeight());
 		//awtComponent.invalidate();
 	}
 	
 	@Override
 	public Graphics getGraphics() {
-		AndroidGraphics2D g = new AndroidGraphics2D(this);
+		AndroidGraphics2D g = new AndroidGraphics2D(destinationRaster);
 		g.setColor(awtComponent.getForeground());
 		g.setBackground(awtComponent.getBackground());
 		g.setFont(awtComponent.getFont());
@@ -177,6 +163,21 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		}
 		else{
 			throw new UnsupportedOperationException("Not yet implemented.");
+		}
+	}
+	
+	@Override
+	public void handleEvent(AWTEvent event) {
+		System.out.println("handling event "+event);
+		super.handleEvent(event);
+		if(event.getID()==PaintEvent.PAINT||event.getID()==PaintEvent.UPDATE){
+			try {
+				pipeout.write(0x08);
+				WritableByteChannel channel = Channels.newChannel(pipeout);
+				channel.write(((DirectDataBufferInt)destinationRaster.getDataBuffer()).buffer);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

@@ -1,70 +1,53 @@
 package julianwi.awtpeer;
 
+import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
-import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DirectColorModel;
-import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
-import gnu.java.awt.java2d.AbstractGraphics2D;
-
-public class AndroidGraphics2D extends AbstractGraphics2D {
+public class AndroidGraphics2D extends CairoGraphics2D {
 	
-	private AndroidWindowPeer awp;
+	private WritableRaster destraster;
 	private boolean disposed;
-	private ColorModel cm;
+	
+	private native long directraster(ByteBuffer buffer, int width, int height);
 
-	public AndroidGraphics2D(AndroidWindowPeer androidWindowPeer) {
+	public AndroidGraphics2D(WritableRaster destinationRaster) {
 		super();
-		if(androidWindowPeer==null)Thread.dumpStack();
-		awp = androidWindowPeer;
-		cm = new DirectColorModel( 32, 0xff0000, 0xff00, 0xff, 0xff000000 );
-		init();
+		if(destinationRaster==null)Thread.dumpStack();
+		destraster = destinationRaster;
+		long pointer = directraster(((DirectDataBufferInt)destinationRaster.getDataBuffer()).buffer, destinationRaster.getWidth(), destinationRaster.getHeight());
+		setup(pointer);
 	    disposed = false;
-	}
-
-	@Override
-	protected ColorModel getColorModel() {
-		return cm;
-	}
-
-	@Override
-	protected Rectangle getDeviceBounds() {
-		return awp.bounds;
 	}
 
 	@Override
 	public GraphicsConfiguration getDeviceConfiguration() {
 		throw new UnsupportedOperationException("Not yet implemented.");
 	}
-	
+
 	@Override
-	public void dispose() {
-		if(!disposed){
-			System.out.println("disposing");
-			//Thread.dumpStack();
-			try {
-				awp.pipeout.write(0x08);
-				DataBufferInt data   = (DataBufferInt) getDestinationRaster().getDataBuffer();
-				ByteBuffer byteBuffer = ByteBuffer.allocate(getDeviceBounds().width * getDeviceBounds().height * 4);
-				byteBuffer.asIntBuffer().put(data.getData());
-				awp.pipeout.write(byteBuffer.array());
-				System.out.println("disposed");
-				disposed = true;
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+	public Graphics create() {
+		return new AndroidGraphics2D(destraster);
 	}
-	
+
 	@Override
-	protected WritableRaster getDestinationRaster() {
-		return awp.destinationRaster;
+	protected void copyAreaImpl(int x, int y, int width, int height, int dx, int dy) {
+		throw new UnsupportedOperationException("Not yet implemented.");
+	}
+
+	@Override
+	protected Rectangle2D getRealBounds() {
+		throw new UnsupportedOperationException("Not yet implemented.");
+		//return null;
+	}
+
+	@Override
+	protected ColorModel getNativeCM() {
+		throw new UnsupportedOperationException("Not yet implemented.");
+		//return null;
 	}
 	
 }
