@@ -47,19 +47,6 @@ public class PipeListener extends Thread {
         		if(c == null && buf != 0x00){
         			c = holder.lockCanvas(null);
         		}
-        		if(buf == 0x01){ //check if id is 01
-        			byte[] array = new byte[4*4];
-        			for(int i=0;i<4*4;i++){
-        				array[i] = (byte) fr.read();
-        				//System.out.println("readed "+array[i]);
-        			}
-        			ByteBuffer wrapped = ByteBuffer.wrap(array);
-        			//System.out.println("have to  fill rect "+wrapped.getInt()+wrapped.getInt()+wrapped.getInt()+wrapped.getInt());
-        			paint.setStyle(Paint.Style.FILL);
-        			int x1 = wrapped.getInt();
-        			int y1 = wrapped.getInt();
-        			c.drawRect(new Rect(x1, y1, x1 + wrapped.getInt(), y1+wrapped.getInt()), paint);
-        		}
         		if(buf == 0x02){
         			FileOutputStream pipeout = new FileOutputStream("/data/data/julianwi.awtpeer/returnpipe");
         			ByteBuffer bb = ByteBuffer.allocate(4*2);
@@ -72,65 +59,12 @@ public class PipeListener extends Thread {
         			pipeout.flush();
         			pipeout.close();
         		}
-        		if(buf == 0x03){
-        			byte[] array = new byte[4];
-        			for(int i=0;i<4;i++){
-        				array[i] = (byte) fr.read();
-        			}
-        			ByteBuffer wrapped = ByteBuffer.wrap(array);
-        			paint.setARGB(wrapped.get(), wrapped.get(), wrapped.get(), wrapped.get());
-        		}
-        		if(buf == 0x04){
-        			byte[] array = new byte[3*4];
-        			for(int i=0;i<3*4;i++){
-        				array[i] = (byte) fr.read();
-        			}
-        			ByteBuffer wrapped = ByteBuffer.wrap(array);
-        			int x = wrapped.getInt();
-        			int y = wrapped.getInt();
-        			byte[] label = new byte[wrapped.getInt()]; //read length of the lable
-        			for(int i=0;i<label.length;i++){
-        				label[i]=(byte) fr.read();
-        				System.out.println("new char "+label[i]);
-        			}
-        			c.drawText(new String(label), x, y, paint);
-        		}
-        		if(buf == 0x05){
-        			byte[] array = new byte[4*4];
-        			for(int i=0;i<4*4;i++){
-        				array[i] = (byte) fr.read();
-        				System.out.println("readed "+array[i]);
-        			}
-        			ByteBuffer wrapped = ByteBuffer.wrap(array);
-        			paint.setStyle(Paint.Style.FILL);
-        			c.drawLine(wrapped.getInt(), wrapped.getInt(), wrapped.getInt(), wrapped.getInt(), paint);
-        		}
-        		if(buf == 0x06){
-        			paint.setAlpha(fr.read());
-        		}
-        		if(buf == 0x07){
-        			DataInputStream stream = (DataInputStream) fr;
-        			int width = stream.readInt();
-        			int height = stream.readInt();
-        			System.out.println(width+" "+height);
-        			Bitmap bm = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        			for(int x = 0; x < width; x++){
-						for(int y = 0; y < height; y++){
-							int color = stream.readInt();
-							if(color != 0){
-								System.out.println("set pixel "+x+" * "+y);
-								bm.setPixel(x, y, color);
-							}
-						}
-        			}
-        			c.drawBitmap(bm, 0, 100, null);
-        		}
         		if(buf == 0x08){
         			byte[] buffer = new byte[c.getWidth()*c.getHeight()*4];
         			fr.read(buffer);
         			IntBuffer intBuf =
 					   ByteBuffer.wrap(buffer)
-					     .order(ByteOrder.BIG_ENDIAN)
+					     .order(ByteOrder.LITTLE_ENDIAN)
 					     .asIntBuffer();
 					int[] array = new int[intBuf.remaining()];
 					intBuf.get(array);

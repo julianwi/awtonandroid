@@ -750,3 +750,20 @@ JNIEXPORT jlong JNICALL Java_julianwi_awtpeer_AndroidGraphics2D_directraster
 	return PTR_TO_JLONG(cr);
 }
 
+JNIEXPORT void JNICALL Java_julianwi_awtpeer_AndroidGraphics2D_cairoDrawString
+  (JNIEnv *env, jobject obj, jlong pointer, jstring str){
+	struct cairographics2d *gr = JLONG_TO_PTR(struct cairographics2d, pointer);
+	const char *text = (*env)->GetStringUTFChars(env, str, 0);
+	cairo_show_text(gr->cr, text);
+	(*env)->ReleaseStringUTFChars(env, str, text);
+}
+
+JNIEXPORT void JNICALL Java_julianwi_awtpeer_AndroidGraphics2D_cairoDrawImage
+  (JNIEnv *env, jobject obj, jlong pointer, jobject buffer, jint x, jint y, jint width, jint height){
+	struct cairographics2d *gr = JLONG_TO_PTR(struct cairographics2d, pointer);
+	char *buf = (*env)->GetDirectBufferAddress(env, buffer);
+	cairo_surface_t *source = cairo_image_surface_create_for_data(buf, CAIRO_FORMAT_ARGB32, width, height, width*4);
+	cairo_set_source_surface (gr->cr, source, x, y);
+	cairo_paint (gr->cr);
+}
+

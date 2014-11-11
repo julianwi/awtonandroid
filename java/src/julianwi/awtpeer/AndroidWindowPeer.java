@@ -1,6 +1,7 @@
 package julianwi.awtpeer;
 
 import java.awt.AWTEvent;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -10,8 +11,10 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.SystemColor;
 import java.awt.Window;
+import java.awt.event.ComponentEvent;
 import java.awt.event.PaintEvent;
 import java.awt.event.WindowEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
@@ -38,6 +41,7 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 	public OutputStream pipeout;
 	public Rectangle bounds;
 	public WritableRaster destinationRaster;
+	public AffineTransform transform;
 
 	public AndroidWindowPeer(Window window) {
 		super(window);
@@ -97,10 +101,17 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		//Graphics g1 = awtComponent.getGraphics();
 		//g1.clearRect(r.x, r.y, r.width, r.height);
 	    //g1.dispose();
-		ComponentReshapeEvent cre = new ComponentReshapeEvent(awtComponent, awtComponent.getX(), awtComponent.getY(), width, height);
-		awtComponent.dispatchEvent(cre);
-		EventQueue eq = AndroidToolkit.getDefaultToolkit().getSystemEventQueue();
+		//ComponentReshapeEvent cre = new ComponentReshapeEvent(awtComponent, awtComponent.getX(), awtComponent.getY(), width, height);
+		//eq.postEvent(cre);//awtComponent.dispatchEvent(cre);
+		//reshape(awtComponent.getX(), awtComponent.getY(), width, height);
+		Graphics g = getGraphics();
+		g.clearRect(0, 0, width, height);
+		g.dispose();
+		//awtComponent.setBounds(0, 0, width, height);
 		Window w = (Window) super.awtComponent;
+		w.setSize(width, height);
+		w.validate();//w.pack();
+		EventQueue eq = AndroidToolkit.getDefaultToolkit().getSystemEventQueue();
 		eq.postEvent(new WindowEvent(w, WindowEvent.WINDOW_OPENED));
 		eq.postEvent(new PaintEvent(w, PaintEvent.PAINT, new Rectangle(0, 0, w.getWidth(), w.getHeight())));
 		System.out.println("showing: "+awtComponent.isShowing());

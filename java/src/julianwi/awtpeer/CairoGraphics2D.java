@@ -1798,8 +1798,7 @@ public abstract class CairoGraphics2D extends Graphics2D
 
   public FontMetrics getFontMetrics(Font f)
   {
-	  throw new UnsupportedOperationException("Not yet implemented.");
-	  //return ((GdkFontPeer) f.getPeer()).getFontMetrics(f);
+	  return ((FreetypeFontPeer) f.getPeer()).getFontMetrics(f);
   }
 
   public void setFont(Font f)

@@ -74,6 +74,9 @@ import gnu.java.awt.peer.swing.SwingButtonPeer;
 import gnu.java.awt.peer.swing.SwingCanvasPeer;
 import gnu.java.awt.peer.swing.SwingCheckboxPeer;
 import gnu.java.awt.peer.swing.SwingLabelPeer;
+import gnu.java.awt.peer.swing.SwingPanelPeer;
+import gnu.java.awt.peer.swing.SwingTextAreaPeer;
+import gnu.java.awt.peer.swing.SwingTextFieldPeer;
 
 public class AndroidToolkit extends ClasspathToolkit {
 	
@@ -223,9 +226,8 @@ public class AndroidToolkit extends ClasspathToolkit {
 	}
 
 	@Override
-	protected PanelPeer createPanel(Panel arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+	protected PanelPeer createPanel(Panel pannel) {
+		return new SwingPanelPeer(pannel);
 	}
 
 	@Override
@@ -247,15 +249,13 @@ public class AndroidToolkit extends ClasspathToolkit {
 	}
 
 	@Override
-	protected TextAreaPeer createTextArea(TextArea arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+	protected TextAreaPeer createTextArea(TextArea textArea) {
+		return new SwingTextAreaPeer(textArea);
 	}
 
 	@Override
-	protected TextFieldPeer createTextField(TextField arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+	protected TextFieldPeer createTextField(TextField textField) {
+		return new SwingTextFieldPeer(textField);
 	}
 
 	@Override

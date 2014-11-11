@@ -28,7 +28,8 @@ public class AndroidGraphicsEnvironment extends ClasspathGraphicsEnvironment {
 	@Override
 	public Graphics2D createGraphics(BufferedImage image) {
 		System.out.println("creating image graphics");
-		return new RasterGraphics(image.getRaster(), image.getColorModel());
+		return new AndroidGraphics2D(image.getRaster());
+		//return new RasterGraphics(image.getRaster(), image.getColorModel());
 	}
 
 	@Override
@@ -58,6 +59,12 @@ public class AndroidGraphicsEnvironment extends ClasspathGraphicsEnvironment {
 	public GraphicsDevice[] getScreenDevices() {
 		throw new UnsupportedOperationException("Not yet implemented.");
 		//return null;
+	}
+	
+	@Override
+	public WritableRaster createRaster(ColorModel cm, SampleModel sm) {
+		DataBuffer db = new DirectDataBufferInt(sm.getWidth()*sm.getHeight());
+		return Raster.createWritableRaster(sm, db, new Point(0, 0));
 	}
 
 }

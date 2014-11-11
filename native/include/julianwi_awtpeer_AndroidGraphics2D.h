@@ -27,6 +27,22 @@ extern "C" {
 JNIEXPORT jlong JNICALL Java_julianwi_awtpeer_AndroidGraphics2D_directraster
   (JNIEnv *, jobject, jobject, jint, jint);
 
+/*
+ * Class:     julianwi_awtpeer_AndroidGraphics2D
+ * Method:    cairoDrawString
+ * Signature: (JLjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_julianwi_awtpeer_AndroidGraphics2D_cairoDrawString
+  (JNIEnv *, jobject, jlong, jstring);
+
+/*
+ * Class:     julianwi_awtpeer_AndroidGraphics2D
+ * Method:    cairoDrawImage
+ * Signature: (JLjava/nio/ByteBuffer;IIII)V
+ */
+JNIEXPORT void JNICALL Java_julianwi_awtpeer_AndroidGraphics2D_cairoDrawImage
+  (JNIEnv *, jobject, jlong, jobject, jint, jint, jint, jint);
+
 #ifdef __cplusplus
 }
 #endif
