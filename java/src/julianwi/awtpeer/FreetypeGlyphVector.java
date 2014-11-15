@@ -34,7 +34,7 @@ public class FreetypeGlyphVector extends GlyphVector {
 		for(char c = ci.first(); c != CharacterIterator.DONE; c = ci.next()) {
 			chars[ci.getIndex()] = c;
 			glyphCodes[ci.getIndex()] = getglyphindex(peer.nativefont, c);
-			System.out.println(c+":index"+glyphCodes[ci.getIndex()]);
+			//System.out.println(c+":index"+glyphCodes[ci.getIndex()]);
 		}
 	}
 	
@@ -95,7 +95,7 @@ public class FreetypeGlyphVector extends GlyphVector {
 		GeneralPath gp = getGlyphOutlineNative(peer.nativefont, glyphCodes[glyphIndex]);
 		AffineTransform tx = AffineTransform.getTranslateInstance(glyphIndex*40, 0);
 		gp.transform(tx);
-		System.out.println(gp);
+		//System.out.println(gp);
 		return gp;
 	}
 

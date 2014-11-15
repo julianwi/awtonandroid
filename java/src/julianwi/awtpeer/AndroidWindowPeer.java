@@ -1,7 +1,6 @@
 package julianwi.awtpeer;
 
 import java.awt.AWTEvent;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -11,7 +10,6 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.SystemColor;
 import java.awt.Window;
-import java.awt.event.ComponentEvent;
 import java.awt.event.PaintEvent;
 import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
@@ -32,7 +30,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 
-import gnu.java.awt.ComponentReshapeEvent;
 import gnu.java.awt.peer.ClasspathFontPeer;
 import gnu.java.awt.peer.swing.SwingWindowPeer;
 
@@ -117,6 +114,7 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		System.out.println("showing: "+awtComponent.isShowing());
 		System.out.println("setted size to: "+awtComponent.getWidth()+" "+awtComponent.getHeight());
 		//awtComponent.invalidate();
+		new WindowPipe(this).start();
 	}
 	
 	@Override
@@ -183,9 +181,12 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		super.handleEvent(event);
 		if(event.getID()==PaintEvent.PAINT||event.getID()==PaintEvent.UPDATE){
 			try {
+				System.out.println("disposing frame");
 				pipeout.write(0x08);
 				WritableByteChannel channel = Channels.newChannel(pipeout);
-				channel.write(((DirectDataBufferInt)destinationRaster.getDataBuffer()).buffer);
+				((DirectDataBufferInt)destinationRaster.getDataBuffer()).buffer.position(0);
+				System.out.println(channel.write(((DirectDataBufferInt)destinationRaster.getDataBuffer()).buffer));
+				pipeout.flush();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
