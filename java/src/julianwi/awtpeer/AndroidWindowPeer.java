@@ -1,6 +1,5 @@
 package julianwi.awtpeer;
 
-import java.awt.AWTEvent;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -24,12 +23,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
-
 import gnu.java.awt.peer.ClasspathFontPeer;
 import gnu.java.awt.peer.swing.SwingWindowPeer;
 
@@ -111,7 +106,6 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		EventQueue eq = AndroidToolkit.getDefaultToolkit().getSystemEventQueue();
 		eq.postEvent(new WindowEvent(w, WindowEvent.WINDOW_OPENED));
 		eq.postEvent(new PaintEvent(w, PaintEvent.PAINT, new Rectangle(0, 0, w.getWidth(), w.getHeight())));
-		System.out.println("showing: "+awtComponent.isShowing());
 		System.out.println("setted size to: "+awtComponent.getWidth()+" "+awtComponent.getHeight());
 		//awtComponent.invalidate();
 		new WindowPipe(this).start();
@@ -119,7 +113,7 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 	
 	@Override
 	public Graphics getGraphics() {
-		AndroidGraphics2D g = new AndroidGraphics2D(destinationRaster);
+		AndroidGraphics2D g = new OnScreenGraphics2D(destinationRaster, this);
 		g.setColor(awtComponent.getForeground());
 		g.setBackground(awtComponent.getBackground());
 		g.setFont(awtComponent.getFont());
@@ -127,10 +121,6 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 	}
 	
 	public Image createImage(int w, int h) {
-		System.out.println("creating image "+w+" * "+h);
-		// FIXME: Should return a buffered image.
-		//return createVolatileImage(w, h);
-		//return new OffScreenImage(w, h);
 		return new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 	}
 	
@@ -172,24 +162,6 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		}
 		else{
 			throw new UnsupportedOperationException("Not yet implemented.");
-		}
-	}
-	
-	@Override
-	public void handleEvent(AWTEvent event) {
-		System.out.println("handling event "+event);
-		super.handleEvent(event);
-		if(event.getID()==PaintEvent.PAINT||event.getID()==PaintEvent.UPDATE){
-			try {
-				System.out.println("disposing frame");
-				pipeout.write(0x08);
-				WritableByteChannel channel = Channels.newChannel(pipeout);
-				((DirectDataBufferInt)destinationRaster.getDataBuffer()).buffer.position(0);
-				System.out.println(channel.write(((DirectDataBufferInt)destinationRaster.getDataBuffer()).buffer));
-				pipeout.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 

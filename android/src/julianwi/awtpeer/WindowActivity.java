@@ -2,19 +2,17 @@ package julianwi.awtpeer;
 
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
 import android.view.Window;
-import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
 
-public class WindowActivity extends Activity implements Callback {
+public class WindowActivity extends Activity {
 	
 	public DataOutputStream pipeout;
 	
@@ -34,49 +32,45 @@ public class WindowActivity extends Activity implements Callback {
 			}
 		}
 		try {
-			Window.class.getMethod("takeSurface", Class.forName("android.view.SurfaceHolder$Callback2")).invoke(getWindow(), Class.forName("julianwi.awtpeer.WindowNewApi").getConstructor().newInstance());
+			Window.class.getMethod("takeSurface", Class.forName("android.view.SurfaceHolder$Callback2")).invoke(getWindow(), Class.forName("julianwi.awtpeer.ListenerNewApi").getConstructor(WindowActivity.class).newInstance(this));
 			System.out.println("succes!");
 		} catch (Exception e) {
 			System.out.println("error");
 			e.printStackTrace();
 			//view = new GraphicsView(this);
 			SurfaceView view = new SurfaceView(this);
-			view.getHolder().addCallback(this);
+			view.getHolder().addCallback(new ListenerOldApi(this));
 			setContentView(view);
 		}
-	}
-
-	@Override
-	public void surfaceCreated(SurfaceHolder holder) {
-		new PipeListener(holder).start();
-	}
-
-	@Override
-	public void surfaceChanged(SurfaceHolder holder, int format, int width,
-			int height) {
-		System.out.println("surfaceChanged "+width+" * "+height);
-	}
-
-	@Override
-	public void surfaceDestroyed(SurfaceHolder holder) {
-		// TODO Auto-generated method stub
-		
 	}
 	
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
 		if(-1<ev.getAction()&&ev.getAction()<3){
 			try {
-				if(pipeout==null)pipeout = new DataOutputStream(new FileOutputStream("/data/data/julianwi.awtpeer/returnpipe"));
 				pipeout.write(0x02+ev.getAction());
-				pipeout.writeFloat(ev.getX());
-				pipeout.writeFloat(ev.getY());
+				pipeout.writeInt((int) ev.getX());
+				pipeout.writeInt((int) ev.getY());
 				return true;
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		try {
+			pipeout.write(0x01);
+			DisplayMetrics metrics = new DisplayMetrics();
+			getWindowManager().getDefaultDisplay().getMetrics(metrics);
+			pipeout.writeInt(metrics.widthPixels);
+			pipeout.writeInt(metrics.heightPixels);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 }

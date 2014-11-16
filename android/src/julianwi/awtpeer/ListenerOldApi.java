@@ -1,0 +1,55 @@
+package julianwi.awtpeer;
+
+import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import android.util.DisplayMetrics;
+import android.view.SurfaceHolder;
+import android.view.SurfaceHolder.Callback;
+
+public class ListenerOldApi implements Callback {
+
+	private WindowActivity window;
+	private PipeListener pl;
+
+	public ListenerOldApi(WindowActivity wa) {
+		window = wa;
+	}
+
+	@Override
+	public void surfaceCreated(SurfaceHolder holder) {
+		System.out.println("surface created");
+		if(pl == null){
+			pl = new PipeListener(holder, window);
+			pl.start();
+			try {
+				window.pipeout = new DataOutputStream(new FileOutputStream("/data/data/julianwi.awtpeer/returnpipe"));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+		else{
+			try {
+				window.pipeout.write(0x01);
+				DisplayMetrics metrics = new DisplayMetrics();
+				window.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+				window.pipeout.writeInt(metrics.widthPixels);
+				window.pipeout.writeInt(metrics.heightPixels);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+		System.out.println("surfaceChanged "+width+" * "+height);
+	}
+
+	@Override
+	public void surfaceDestroyed(SurfaceHolder holder) {
+	}
+
+}
