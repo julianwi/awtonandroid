@@ -1,6 +1,5 @@
 package julianwi.awtpeer;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -26,7 +25,7 @@ public class PipeListener extends Thread {
     public void run() {
         try {
         	Thread.sleep(1000);
-        	InputStream fr = new BufferedInputStream(new FileInputStream(new File("/data/data/julianwi.awtpeer/pipe")));
+        	InputStream fr = new FileInputStream(new File("/data/data/julianwi.awtpeer/pipe"));
         	Canvas c = null;
         	while(true){
         		byte buf =(byte) fr.read();
@@ -34,9 +33,11 @@ public class PipeListener extends Thread {
         		if(buf == 0x02){
         			DisplayMetrics metrics = new DisplayMetrics();
         			window.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        			window.pipeout.write(0x01);
-        			window.pipeout.writeInt(metrics.widthPixels);
-        			window.pipeout.writeInt(metrics.heightPixels);
+        			synchronized (window.pipeout) {
+        				window.pipeout.write(0x01);
+            			window.pipeout.writeInt(metrics.widthPixels);
+            			window.pipeout.writeInt(metrics.heightPixels);
+					}
         			window.pipeout.flush();
         		}
         		if(buf == 0x08){

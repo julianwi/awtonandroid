@@ -48,9 +48,11 @@ public class WindowActivity extends Activity {
 	public boolean dispatchTouchEvent(MotionEvent ev) {
 		if(-1<ev.getAction()&&ev.getAction()<3){
 			try {
-				pipeout.write(0x02+ev.getAction());
-				pipeout.writeInt((int) ev.getX());
-				pipeout.writeInt((int) ev.getY());
+				synchronized (pipeout) {
+					pipeout.write(0x02+ev.getAction());
+					pipeout.writeInt((int) ev.getX());
+					pipeout.writeInt((int) ev.getY());
+				}
 				return true;
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -63,11 +65,13 @@ public class WindowActivity extends Activity {
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		try {
-			pipeout.write(0x01);
 			DisplayMetrics metrics = new DisplayMetrics();
 			getWindowManager().getDefaultDisplay().getMetrics(metrics);
-			pipeout.writeInt(metrics.widthPixels);
-			pipeout.writeInt(metrics.heightPixels);
+			synchronized (pipeout) {
+				pipeout.write(0x01);
+				pipeout.writeInt(metrics.widthPixels);
+				pipeout.writeInt(metrics.heightPixels);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

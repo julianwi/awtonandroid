@@ -32,11 +32,13 @@ public class ListenerOldApi implements Callback {
 		}
 		else{
 			try {
-				window.pipeout.write(0x01);
 				DisplayMetrics metrics = new DisplayMetrics();
 				window.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-				window.pipeout.writeInt(metrics.widthPixels);
-				window.pipeout.writeInt(metrics.heightPixels);
+				synchronized (window.pipeout) {
+					window.pipeout.write(0x01);
+					window.pipeout.writeInt(metrics.widthPixels);
+					window.pipeout.writeInt(metrics.heightPixels);
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 
+import javax.swing.text.rtf.RTFEditorKit;
+
 public class OnScreenGraphics2D extends AndroidGraphics2D {
 
 	private AndroidWindowPeer awp;
@@ -16,16 +18,10 @@ public class OnScreenGraphics2D extends AndroidGraphics2D {
 	
 	@Override
 	public void dispose() {
-		try {
-			synchronized (awp.pipeout) {
-				awp.pipeout.write(0x08);
-				WritableByteChannel channel = Channels.newChannel(awp.pipeout);
-				((DirectDataBufferInt)awp.destinationRaster.getDataBuffer()).buffer.position(0);
-				channel.write(((DirectDataBufferInt)awp.destinationRaster.getDataBuffer()).buffer);
-				awp.pipeout.flush();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		awp.grchanged = true;
+		if(!awp.rt.isAlive()){
+			awp.rt = new RefreshThread(awp);
+			awp.rt.start();
 		}
 		super.dispose();
 	}

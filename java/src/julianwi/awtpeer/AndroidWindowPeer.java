@@ -9,9 +9,9 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.SystemColor;
 import java.awt.Window;
+import java.awt.event.FocusEvent;
 import java.awt.event.PaintEvent;
 import java.awt.event.WindowEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
@@ -19,12 +19,12 @@ import java.awt.image.SampleModel;
 import java.awt.image.SinglePixelPackedSampleModel;
 import java.awt.image.VolatileImage;
 import java.awt.image.WritableRaster;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+
 import gnu.java.awt.peer.ClasspathFontPeer;
 import gnu.java.awt.peer.swing.SwingWindowPeer;
 
@@ -33,7 +33,8 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 	public OutputStream pipeout;
 	public Rectangle bounds;
 	public WritableRaster destinationRaster;
-	public AffineTransform transform;
+	public RefreshThread rt = new RefreshThread(this);
+	public boolean grchanged = false;
 
 	public AndroidWindowPeer(Window window) {
 		super(window);
@@ -53,7 +54,7 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 			e.printStackTrace();
 		}
 		try {
-			pipeout = new BufferedOutputStream(new FileOutputStream("/data/data/julianwi.awtpeer/pipe"));
+			pipeout = new FileOutputStream("/data/data/julianwi.awtpeer/pipe");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -163,6 +164,11 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		else{
 			throw new UnsupportedOperationException("Not yet implemented.");
 		}
+	}
+	
+	@Override
+	protected void handleFocusEvent(FocusEvent e) {
+		System.out.println("handling focus evenet "+e);
 	}
 
 }
