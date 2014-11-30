@@ -1,7 +1,5 @@
 package julianwi.awtpeer;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -24,8 +22,7 @@ public class PipeListener extends Thread {
 	@Override
     public void run() {
         try {
-        	Thread.sleep(1000);
-        	InputStream fr = new FileInputStream(new File("/data/data/julianwi.awtpeer/pipe"));
+        	InputStream fr = window.socket.getInputStream();
         	Canvas c = null;
         	while(true){
         		byte buf =(byte) fr.read();
@@ -45,7 +42,13 @@ public class PipeListener extends Thread {
         			window.getWindowManager().getDefaultDisplay().getMetrics(metrics);
         			System.out.println(metrics.widthPixels+"*"+metrics.heightPixels);
         			byte[] buffer = new byte[metrics.widthPixels*metrics.heightPixels*4];
-        			fr.read(buffer);
+        			int offset = 0;
+        			int len = buffer.length;
+        			int read = 0;
+					while ((read = fr.read(buffer, offset, len)) != len) {
+						offset = offset + read;
+						len = len - read;
+					}
         			IntBuffer intBuf =
 					   ByteBuffer.wrap(buffer)
 					     .order(ByteOrder.LITTLE_ENDIAN)

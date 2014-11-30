@@ -1,11 +1,12 @@
 package julianwi.awtpeer;
 
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
 
 import android.app.Activity;
 import android.content.res.Configuration;
+import android.net.LocalServerSocket;
+import android.net.LocalSocket;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
@@ -15,21 +16,23 @@ import android.view.SurfaceView;
 public class WindowActivity extends Activity {
 	
 	public DataOutputStream pipeout;
+	public LocalServerSocket server;
+	public LocalSocket socket;
+	
+	static{
+		System.loadLibrary("awtpeer");
+	}
+	
+	private native LocalSocket createsock();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if(!new File("/data/data/julianwi.awtpeer/pipe").exists()){
-			try {
-				String bbpath = createPackageContext("julianwi.javainstaller", 0).getSharedPreferences("settings", 1).getString("path1", "/data/data/jackpal.androidterm/bin")+"/busybox";
-				System.out.println(bbpath);
-				Runtime.getRuntime().exec(bbpath+" mkfifo /data/data/julianwi.awtpeer/pipe");
-				Runtime.getRuntime().exec(bbpath+" mkfifo /data/data/julianwi.awtpeer/returnpipe");
-				Runtime.getRuntime().exec(bbpath+" chmod 0666 /data/data/julianwi.awtpeer/pipe");
-				Runtime.getRuntime().exec(bbpath+" chmod 0666 /data/data/julianwi.awtpeer/returnpipe");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		socket = createsock();
+		try {
+			pipeout = new DataOutputStream(socket.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		try {
 			Window.class.getMethod("takeSurface", Class.forName("android.view.SurfaceHolder$Callback2")).invoke(getWindow(), Class.forName("julianwi.awtpeer.ListenerNewApi").getConstructor(WindowActivity.class).newInstance(this));

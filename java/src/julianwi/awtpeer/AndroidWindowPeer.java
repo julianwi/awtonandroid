@@ -19,27 +19,32 @@ import java.awt.image.SampleModel;
 import java.awt.image.SinglePixelPackedSampleModel;
 import java.awt.image.VolatileImage;
 import java.awt.image.WritableRaster;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import gnu.java.awt.peer.ClasspathFontPeer;
 import gnu.java.awt.peer.swing.SwingWindowPeer;
+import gnu.java.net.local.LocalSocket;
+import gnu.java.net.local.LocalSocketAddress;
 
 public class AndroidWindowPeer extends SwingWindowPeer {
 
 	public OutputStream pipeout;
+	public DataInputStream pipein;
 	public Rectangle bounds;
 	public WritableRaster destinationRaster;
 	public RefreshThread rt = new RefreshThread(this);
 	public boolean grchanged = false;
+	public LocalSocket ls;
 
 	public AndroidWindowPeer(Window window) {
 		super(window);
 		System.out.println("window constructed");
-	    new Insets(0, 0, 0, 0);
 	    awtComponent.setBackground(SystemColor.window);
 	}
 	
@@ -54,7 +59,10 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 			e.printStackTrace();
 		}
 		try {
-			pipeout = new FileOutputStream("/data/data/julianwi.awtpeer/pipe");
+			ls = new LocalSocket(new LocalSocketAddress("/data/data/julianwi.awtpeer/socket"));
+			pipeout = ls.getOutputStream();
+			pipein = new DataInputStream(ls.getInputStream());
+			//pipeout = new FileOutputStream("/data/data/julianwi.awtpeer/pipe");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -66,17 +74,18 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		try {
 			pipeout.write(0x02);
 			pipeout.flush();
-			FileInputStream fr = new FileInputStream(new File("/data/data/julianwi.awtpeer/returnpipe"));
+			//FileInputStream fr = new FileInputStream(new File("/data/data/julianwi.awtpeer/returnpipe"));
+			//InputStream fr = pipein;//ls.getInputStream();
 			byte[] array = new byte[4*2];
-			while(fr.read() != 0x01){
+			while(pipein.read() != 0x01){
 				Thread.sleep(10);
 			}
 			for(int i=0;i<4*2;i++){
 				System.out.println("reading"+i);
-				array[i] = (byte) fr.read();
+				array[i] = (byte) pipein.read();
 				System.out.println("readed "+array[i]);
 			}
-			fr.close();
+			//fr.close();
 			ByteBuffer wrapped = ByteBuffer.wrap(array);
 			width = wrapped.getInt();
 			height = wrapped.getInt();

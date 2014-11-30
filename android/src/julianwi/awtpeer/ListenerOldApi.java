@@ -1,8 +1,5 @@
 package julianwi.awtpeer;
 
-import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import android.util.DisplayMetrics;
@@ -24,11 +21,6 @@ public class ListenerOldApi implements Callback {
 		if(pl == null){
 			pl = new PipeListener(holder, window);
 			pl.start();
-			try {
-				window.pipeout = new DataOutputStream(new FileOutputStream("/data/data/julianwi.awtpeer/returnpipe"));
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
 		}
 		else{
 			try {

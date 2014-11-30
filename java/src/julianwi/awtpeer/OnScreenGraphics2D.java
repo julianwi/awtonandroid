@@ -1,11 +1,6 @@
 package julianwi.awtpeer;
 
 import java.awt.image.WritableRaster;
-import java.io.IOException;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
-
-import javax.swing.text.rtf.RTFEditorKit;
 
 public class OnScreenGraphics2D extends AndroidGraphics2D {
 

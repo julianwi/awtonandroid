@@ -13,8 +13,6 @@ import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.SinglePixelPackedSampleModel;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 
 public class WindowPipe extends Thread{
@@ -28,13 +26,12 @@ public class WindowPipe extends Thread{
 	@Override
 	public void run() {
 		try {
-			DataInputStream stream = new DataInputStream(new FileInputStream("/data/data/julianwi.awtpeer/returnpipe"));
 			while(true) {
-				int id = stream.read();
+				int id = awp.pipein.read();
 				System.out.println("reading "+id);
 				if(id == 0x01) {
-					int width = stream.readInt();
-					int height = stream.readInt();
+					int width = awp.pipein.readInt();
+					int height = awp.pipein.readInt();
 					Rectangle r = new Rectangle(0, 0, width, height);
 					awp.bounds = r;
 					int[] bandMasks = new int[]{ 0xFF0000, 0xFF00, 0xFF };
@@ -52,24 +49,24 @@ public class WindowPipe extends Thread{
 					eq.postEvent(new PaintEvent(w, PaintEvent.PAINT, new Rectangle(0, 0, w.getWidth(), w.getHeight())));
 				}
 				if(id == 0x02){
-					int x = stream.readInt();
-					int y = stream.readInt();
+					int x = awp.pipein.readInt();
+					int y = awp.pipein.readInt();
 					MouseEvent me = new MouseEvent(awp.getComponent(), MouseEvent.MOUSE_PRESSED, System.currentTimeMillis(), MouseEvent.BUTTON1_MASK, x, y, 1, false, MouseEvent.BUTTON1);
 					Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(me);
 				}
 				if(id == 0x03){
-					int x = stream.readInt();
-					int y = stream.readInt();
+					int x = awp.pipein.readInt();
+					int y = awp.pipein.readInt();
 					MouseEvent me = new MouseEvent(awp.getComponent(), MouseEvent.MOUSE_RELEASED, System.currentTimeMillis(), MouseEvent.BUTTON1_MASK, x, y, 1, false, MouseEvent.BUTTON1);
 					Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(me);
 				}if(id == 0x04){
-					int x = stream.readInt();
-					int y = stream.readInt();
+					int x = awp.pipein.readInt();
+					int y = awp.pipein.readInt();
 					MouseEvent me = new MouseEvent(awp.getComponent(), MouseEvent.MOUSE_DRAGGED, System.currentTimeMillis(), MouseEvent.BUTTON1_MASK, x, y, 1, false, MouseEvent.BUTTON1);
 					Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(me);
 				}
 				if(id == -1){
-					stream.close();
+					awp.pipein.close();
 					throw new AWTException("conection to android activity lost");
 				}
 			}

@@ -1,8 +1,7 @@
 package julianwi.awtpeer;
 
 import java.io.IOException;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
+import java.nio.ByteBuffer;
 
 public class RefreshThread extends Thread {
 	
@@ -17,10 +16,12 @@ public class RefreshThread extends Thread {
 		while (awp.grchanged) {
 			awp.grchanged = false;
 			try {
+				ByteBuffer buffer = ((DirectDataBufferInt)awp.destinationRaster.getDataBuffer()).buffer;
 				awp.pipeout.write(0x08);
-				WritableByteChannel channel = Channels.newChannel(awp.pipeout);
-				((DirectDataBufferInt)awp.destinationRaster.getDataBuffer()).buffer.position(0);
-				channel.write(((DirectDataBufferInt)awp.destinationRaster.getDataBuffer()).buffer);
+				buffer.position(0);
+				byte[] bytes = new byte [buffer.remaining()];
+			    buffer.get(bytes);
+			    awp.pipeout.write(bytes);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
