@@ -23,6 +23,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -62,7 +63,6 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 			ls = new LocalSocket(new LocalSocketAddress("/data/data/julianwi.awtpeer/socket"));
 			pipeout = ls.getOutputStream();
 			pipein = new DataInputStream(ls.getInputStream());
-			//pipeout = new FileOutputStream("/data/data/julianwi.awtpeer/pipe");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -72,26 +72,11 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 		
 		int height = 0, width = 0;
 		try {
-			pipeout.write(0x02);
-			pipeout.flush();
-			//FileInputStream fr = new FileInputStream(new File("/data/data/julianwi.awtpeer/returnpipe"));
-			//InputStream fr = pipein;//ls.getInputStream();
-			byte[] array = new byte[4*2];
-			while(pipein.read() != 0x01){
-				Thread.sleep(10);
-			}
-			for(int i=0;i<4*2;i++){
-				System.out.println("reading"+i);
-				array[i] = (byte) pipein.read();
-				System.out.println("readed "+array[i]);
-			}
-			//fr.close();
-			ByteBuffer wrapped = ByteBuffer.wrap(array);
-			width = wrapped.getInt();
-			height = wrapped.getInt();
+			width = pipein.readInt();
+			height = pipein.readInt();
 			System.out.println("reading width: "+width+" heigth: "+height);
 			//awtComponent.setSize(width, height);
-		} catch (Exception e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		Rectangle r = new Rectangle(0, 0, width, height);

@@ -2,6 +2,7 @@ package julianwi.awtpeer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class RefreshThread extends Thread {
 	

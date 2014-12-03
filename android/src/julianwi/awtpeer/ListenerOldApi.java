@@ -1,15 +1,19 @@
 package julianwi.awtpeer;
 
+import java.io.DataOutputStream;
+import java.io.FileDescriptor;
 import java.io.IOException;
 
 import android.util.DisplayMetrics;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 
 public class ListenerOldApi implements Callback {
 
 	private WindowActivity window;
-	private PipeListener pl;
+	
+	private native void listsocket(Surface suface, FileDescriptor fd);
 
 	public ListenerOldApi(WindowActivity wa) {
 		window = wa;
@@ -18,9 +22,21 @@ public class ListenerOldApi implements Callback {
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		System.out.println("surface created");
-		if(pl == null){
-			pl = new PipeListener(holder, window);
-			pl.start();
+		if(window.socket == null){
+			DisplayMetrics metrics = new DisplayMetrics();
+			window.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+			try {
+				window.socket = WindowActivity.server.accept();
+				window.pipeout = new DataOutputStream(window.socket.getOutputStream());
+				synchronized (window.pipeout) {
+	    			window.pipeout.writeInt(metrics.widthPixels);
+	    			window.pipeout.writeInt(metrics.heightPixels);
+				}
+				window.pipeout.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			listsocket(holder.getSurface(), window.socket.getFileDescriptor());
 		}
 		else{
 			try {

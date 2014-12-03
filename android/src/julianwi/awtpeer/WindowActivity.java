@@ -1,6 +1,7 @@
 package julianwi.awtpeer;
 
 import java.io.DataOutputStream;
+import java.io.FileDescriptor;
 import java.io.IOException;
 
 import android.app.Activity;
@@ -16,19 +17,25 @@ import android.view.SurfaceView;
 public class WindowActivity extends Activity {
 	
 	public DataOutputStream pipeout;
-	public LocalServerSocket server;
-	public LocalSocket socket;
+	public LocalSocket socket = new LocalSocket();
+	public static LocalServerSocket server;
 	
 	static{
 		System.loadLibrary("awtpeer");
 	}
 	
-	private native LocalSocket createsock();
+	private native FileDescriptor createsock();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		socket = createsock();
+		try {
+			if(server == null){
+				server = new LocalServerSocket(createsock());
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		try {
 			pipeout = new DataOutputStream(socket.getOutputStream());
 		} catch (IOException e) {
