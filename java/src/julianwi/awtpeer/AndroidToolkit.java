@@ -1,14 +1,10 @@
 package julianwi.awtpeer;
 
 import java.awt.AWTException;
-import java.awt.Button;
-import java.awt.Canvas;
 import java.awt.Checkbox;
 import java.awt.CheckboxMenuItem;
 import java.awt.Choice;
 import java.awt.Dialog;
-import java.awt.Dialog.ModalExclusionType;
-import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FileDialog;
@@ -18,29 +14,22 @@ import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
-import java.awt.Label;
 import java.awt.List;
-import java.awt.Menu;
-import java.awt.MenuBar;
-import java.awt.MenuItem;
-import java.awt.Panel;
 import java.awt.PopupMenu;
 import java.awt.PrintJob;
 import java.awt.ScrollPane;
 import java.awt.Scrollbar;
 import java.awt.TextArea;
-import java.awt.TextField;
 import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.peer.DragSourceContextPeer;
 import java.awt.font.TextAttribute;
 import java.awt.im.InputMethodHighlight;
+import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
-import java.awt.peer.ButtonPeer;
-import java.awt.peer.CanvasPeer;
 import java.awt.peer.CheckboxMenuItemPeer;
 import java.awt.peer.CheckboxPeer;
 import java.awt.peer.ChoicePeer;
@@ -48,37 +37,31 @@ import java.awt.peer.DialogPeer;
 import java.awt.peer.FileDialogPeer;
 import java.awt.peer.FontPeer;
 import java.awt.peer.FramePeer;
-import java.awt.peer.LabelPeer;
 import java.awt.peer.ListPeer;
-import java.awt.peer.MenuBarPeer;
-import java.awt.peer.MenuItemPeer;
-import java.awt.peer.MenuPeer;
-import java.awt.peer.PanelPeer;
 import java.awt.peer.PopupMenuPeer;
 import java.awt.peer.RobotPeer;
 import java.awt.peer.ScrollPanePeer;
 import java.awt.peer.ScrollbarPeer;
 import java.awt.peer.TextAreaPeer;
-import java.awt.peer.TextFieldPeer;
 import java.awt.peer.WindowPeer;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
 
-import gnu.java.awt.ClasspathToolkit;
+import javax.imageio.ImageIO;
+
 import gnu.java.awt.EmbeddedWindow;
+import gnu.java.awt.image.ImageConverter;
+import gnu.java.awt.java2d.AbstractGraphics2D;
 import gnu.java.awt.peer.ClasspathFontPeer;
 import gnu.java.awt.peer.EmbeddedWindowPeer;
-import gnu.java.awt.peer.swing.SwingButtonPeer;
-import gnu.java.awt.peer.swing.SwingCanvasPeer;
 import gnu.java.awt.peer.swing.SwingCheckboxPeer;
-import gnu.java.awt.peer.swing.SwingLabelPeer;
-import gnu.java.awt.peer.swing.SwingPanelPeer;
 import gnu.java.awt.peer.swing.SwingTextAreaPeer;
-import gnu.java.awt.peer.swing.SwingTextFieldPeer;
+import gnu.java.awt.peer.swing.SwingToolkit;
 
-public class AndroidToolkit extends ClasspathToolkit {
+public class AndroidToolkit extends SwingToolkit {
 	
 	private EventQueue eventQueue;
 
@@ -122,22 +105,13 @@ public class AndroidToolkit extends ClasspathToolkit {
 	}
 
 	@Override
-	protected ButtonPeer createButton(Button arg0) {
-		return new SwingButtonPeer(arg0);
-	}
-
-	@Override
-	protected CanvasPeer createCanvas(Canvas can) {
-		return new SwingCanvasPeer(can);
-	}
-
-	@Override
 	protected CheckboxPeer createCheckbox(Checkbox checkbox) {
-		return new SwingCheckboxPeer(checkbox);
+		throw new UnsupportedOperationException("Not yet implemented.");
+		//return null;
 	}
 
 	@Override
-	protected CheckboxMenuItemPeer createCheckboxMenuItem(CheckboxMenuItem arg0) {
+	protected CheckboxMenuItemPeer createCheckboxMenuItem(CheckboxMenuItem target) {
 		throw new UnsupportedOperationException("Not yet implemented.");
 		//return null;
 	}
@@ -179,15 +153,26 @@ public class AndroidToolkit extends ClasspathToolkit {
 	}
 
 	@Override
-	public Image createImage(URL arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+	public Image createImage(URL url) {
+		BufferedImage buffered;
+		try {
+			buffered = ImageIO.read(url.openStream());
+		} catch (IOException e) {
+			throw new UnsupportedOperationException("Not yet implemented.");
+		}
+		if(buffered != null){
+			return buffered;
+		}
+		else{
+			throw new UnsupportedOperationException("Not yet implemented.");
+		}
 	}
 
 	@Override
-	public Image createImage(ImageProducer arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+	public Image createImage(ImageProducer producer) {
+		ImageConverter conv = new ImageConverter();
+		producer.startProduction(conv);
+		return conv.getImage();
 	}
 
 	@Override
@@ -197,37 +182,9 @@ public class AndroidToolkit extends ClasspathToolkit {
 	}
 
 	@Override
-	protected LabelPeer createLabel(Label arg0) {
-		return new SwingLabelPeer(arg0);
-	}
-
-	@Override
 	protected ListPeer createList(List arg0) {
 		throw new UnsupportedOperationException("Not yet implemented.");
 		//return null;
-	}
-
-	@Override
-	protected MenuPeer createMenu(Menu arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
-	}
-
-	@Override
-	protected MenuBarPeer createMenuBar(MenuBar arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
-	}
-
-	@Override
-	protected MenuItemPeer createMenuItem(MenuItem arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
-	}
-
-	@Override
-	protected PanelPeer createPanel(Panel pannel) {
-		return new SwingPanelPeer(pannel);
 	}
 
 	@Override
@@ -251,11 +208,6 @@ public class AndroidToolkit extends ClasspathToolkit {
 	@Override
 	protected TextAreaPeer createTextArea(TextArea textArea) {
 		return new SwingTextAreaPeer(textArea);
-	}
-
-	@Override
-	protected TextFieldPeer createTextField(TextField textField) {
-		return new SwingTextFieldPeer(textField);
 	}
 
 	@Override
@@ -296,9 +248,8 @@ public class AndroidToolkit extends ClasspathToolkit {
 	}
 
 	@Override
-	public Image getImage(URL arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null;
+	public Image getImage(URL url) {
+		return createImage(url);
 	}
 
 	@Override
@@ -334,18 +285,6 @@ public class AndroidToolkit extends ClasspathToolkit {
 	}
 
 	@Override
-	public boolean isModalExclusionTypeSupported(ModalExclusionType arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return false;
-	}
-
-	@Override
-	public boolean isModalityTypeSupported(ModalityType arg0) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return false;
-	}
-
-	@Override
 	public Map<TextAttribute, ?> mapInputMethodHighlight(
 			InputMethodHighlight arg0) {
 		throw new UnsupportedOperationException("Not yet implemented.");
@@ -353,10 +292,9 @@ public class AndroidToolkit extends ClasspathToolkit {
 	}
 
 	@Override
-	public boolean prepareImage(Image arg0, int arg1, int arg2,
-			ImageObserver arg3) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return false;
+	public boolean prepareImage(Image image, int width, int height, ImageObserver observer) {
+		AbstractGraphics2D.prepareImage(image, width, height);
+		return true;
 	}
 
 	@Override

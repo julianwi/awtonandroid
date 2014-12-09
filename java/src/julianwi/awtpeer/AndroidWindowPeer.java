@@ -4,6 +4,9 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
@@ -121,8 +124,10 @@ public class AndroidWindowPeer extends SwingWindowPeer {
 	
 	@Override
 	public VolatileImage createVolatileImage(int width, int height) {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return null
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice gd = ge.getDefaultScreenDevice();
+		GraphicsConfiguration gc = gd.getDefaultConfiguration();
+		return gc.createCompatibleVolatileImage(width, height);
 	}
 
 	@Override

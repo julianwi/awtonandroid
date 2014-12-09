@@ -10,8 +10,11 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
 import java.awt.image.ImageObserver;
 import java.awt.image.WritableRaster;
+import java.io.WriteAbortedException;
 import java.nio.ByteBuffer;
 
 public class AndroidGraphics2D extends CairoGraphics2D {
@@ -77,7 +80,9 @@ public class AndroidGraphics2D extends CairoGraphics2D {
 	}
 	
 	@Override
-	public boolean drawImage(Image img, int x, int y, ImageObserver observer) {
+	public boolean drawImage(Image img, AffineTransform xform, Color bgcolor, ImageObserver obs) {
+		int x = (int) xform.getTranslateX();
+		int y = (int) xform.getTranslateY();
 		if(img instanceof BufferedImage && ((BufferedImage) img).getRaster().getDataBuffer() instanceof DirectDataBufferInt){
 			DirectDataBufferInt data = (DirectDataBufferInt) ((BufferedImage) img).getRaster().getDataBuffer();
 			System.out.println("drawing image to "+x+"|"+y);
@@ -85,7 +90,21 @@ public class AndroidGraphics2D extends CairoGraphics2D {
 			cairoDrawImage(nativePointer, data.buffer, x, y, ((BufferedImage) img).getRaster().getWidth(), ((BufferedImage) img).getRaster().getHeight());
 			return true;
 		}
-		return super.drawImage(img, x, y, observer);
+		else if(img instanceof BufferedImage && ((BufferedImage)img).getRaster().getDataBuffer() instanceof DataBufferByte){
+			DataBufferByte data = (DataBufferByte) ((BufferedImage)img).getRaster().getDataBuffer();
+			ByteBuffer buffer = ByteBuffer.allocateDirect(data.getData().length).put(data.getData());
+			System.out.println("drawing image to "+x+"|"+y);
+			System.out.println("image bounds "+((BufferedImage)img).getRaster().getBounds());
+			cairoDrawImage(nativePointer, buffer, x, y, ((BufferedImage) img).getRaster().getWidth(), ((BufferedImage) img).getRaster().getHeight());
+			return true;
+		}
+		else if(img instanceof AndroidVolatileImage){
+			WritableRaster raster = ((AndroidVolatileImage)img).raster;
+			cairoDrawImage(nativePointer, ((DirectDataBufferInt)raster.getDataBuffer()).buffer, x, y, raster.getWidth(), raster.getHeight());
+			return true;
+		}
+		System.out.println(img);
+		throw new UnsupportedOperationException("Not yet implemented.");
 	}
 	
 	@Override

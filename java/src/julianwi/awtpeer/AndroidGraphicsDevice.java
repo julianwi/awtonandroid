@@ -16,7 +16,7 @@ public class AndroidGraphicsDevice extends GraphicsDevice {
 	@Override
 	public GraphicsConfiguration getDefaultConfiguration() {
 		if(defaultConfiguration == null) {
-			defaultConfiguration = new AndroidGraphicsConfiguration();
+			defaultConfiguration = new AndroidGraphicsConfiguration(this);
 		}
 		return defaultConfiguration;
 	}
@@ -29,8 +29,7 @@ public class AndroidGraphicsDevice extends GraphicsDevice {
 
 	@Override
 	public int getType() {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return 0;
+		return TYPE_RASTER_SCREEN;
 	}
 
 }

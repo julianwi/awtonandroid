@@ -60,14 +60,13 @@ public class FreetypeLineMetrics extends LineMetrics {
 
 	@Override
 	public float getUnderlineOffset() {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return 0;
+		return 10;
 	}
 
 	@Override
 	public float getUnderlineThickness() {
-		throw new UnsupportedOperationException("Not yet implemented.");
-		//return 0;
+		//TODO implement this
+		return 10;
 	}
 
 }
