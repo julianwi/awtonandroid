@@ -74,6 +74,7 @@ public class WindowPipe extends Thread{
 			e.printStackTrace();
 		} catch (AWTException e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 

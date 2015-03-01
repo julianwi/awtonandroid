@@ -46,7 +46,7 @@
     <exec executable="adb">
         <arg value="shell"/>
         <!-- java -Dawt.toolkit=julianwi.awtpeer.AndroidToolkit -cp /sdcard/awtpeer.zip:/sdcard/test.jar test.main.Main -->
-        <arg value="java -jar /sdcard/test.jar"/>
+	<arg value="/data/data/julianwi.javainstaller/java -jar /sdcard/test.jar"/>
     </exec>
 </target>
 </project>

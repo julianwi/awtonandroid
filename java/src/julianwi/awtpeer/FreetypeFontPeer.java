@@ -20,7 +20,7 @@ public class FreetypeFontPeer extends ClasspathFontPeer {
 	public long nativefont = 0;
 	
 	static {
-		System.loadLibrary("ftpeer");
+		System.loadLibrary("awtonandroid");
 		int error = initFreeType();
 		System.out.println("freetype init error code "+error);
 		if(error != 0){

@@ -124,7 +124,7 @@ public abstract class CairoGraphics2D extends Graphics2D
   {
     if (Configuration.INIT_LOAD_LIBRARY)
       {
-        System.loadLibrary("cairopeer");
+        System.loadLibrary("awtonandroid");
       }
   }
 

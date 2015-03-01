@@ -22,7 +22,7 @@ public class ListenerOldApi implements Callback {
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		System.out.println("surface created");
-		if(window.socket == null){
+		if(!window.socket.isConnected()){
 			DisplayMetrics metrics = new DisplayMetrics();
 			window.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 			try {
